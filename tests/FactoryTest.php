@@ -7,6 +7,7 @@ namespace Conia\Http\Tests;
 use Conia\Http\Factory\Guzzle;
 use Conia\Http\Factory\Laminas;
 use Conia\Http\Factory\Nyholm;
+use Conia\Http\Exception\RuntimeException;
 
 use stdClass;
 
@@ -35,7 +36,7 @@ final class FactoryTest extends TestCase
         $stream = $factory->stream(fopen('php://temp', 'r+'));
         $this->assertInstanceOf(\Nyholm\Psr7\Stream::class, $stream);
 
-        $stream = $factory->streamFromFile(__DIR__ . '/Fixtures/public/static/image.webp');
+        $stream = $factory->streamFromFile(__DIR__ . '/Fixtures/image.webp');
         $this->assertInstanceOf(\Nyholm\Psr7\Stream::class, $stream);
     }
 
@@ -62,7 +63,7 @@ final class FactoryTest extends TestCase
         $stream = $factory->stream(fopen('php://temp', 'r+'));
         $this->assertInstanceOf(\GuzzleHttp\Psr7\Stream::class, $stream);
 
-        $stream = $factory->streamFromFile(__DIR__ . '/Fixtures/public/static/image.webp');
+        $stream = $factory->streamFromFile(__DIR__ . '/Fixtures/image.webp');
         $this->assertInstanceOf(\GuzzleHttp\Psr7\Stream::class, $stream);
     }
 
@@ -89,7 +90,7 @@ final class FactoryTest extends TestCase
         $stream = $factory->stream(fopen('php://temp', 'r+'));
         $this->assertInstanceOf(\Laminas\Diactoros\Stream::class, $stream);
 
-        $stream = $factory->streamFromFile(__DIR__ . '/Fixtures/public/static/image.webp');
+        $stream = $factory->streamFromFile(__DIR__ . '/Fixtures/image.webp');
         $this->assertInstanceOf(\Laminas\Diactoros\Stream::class, $stream);
     }
 

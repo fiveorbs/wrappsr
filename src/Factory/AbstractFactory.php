@@ -13,6 +13,7 @@ use Psr\Http\Message\StreamFactoryInterface as PsrStreamFactory;
 use Psr\Http\Message\StreamInterface as PsrStream;
 use Stringable;
 
+/** @psalm-api */
 abstract class AbstractFactory implements Factory
 {
     protected PsrResponseFactory $responseFactory;

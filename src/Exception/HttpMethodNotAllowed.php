@@ -6,6 +6,7 @@ namespace Conia\Http\Exception;
 
 use Throwable;
 
+/** @psalm-api */
 class HttpMethodNotAllowed extends HttpError
 {
     public function __construct(

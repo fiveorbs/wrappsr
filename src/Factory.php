@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
 use Psr\Http\Message\StreamInterface as PsrStream;
 
+/** @psalm-api */
 interface Factory
 {
     public function request(): PsrServerRequest;
