@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Conia\Http\Factory;
 
-use Conia\Chuck\Exception\RuntimeException;
+use Conia\Http\Exception\RuntimeException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;

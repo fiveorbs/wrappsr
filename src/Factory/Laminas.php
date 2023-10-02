@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Conia\Http\Factory;
 
-use Conia\Chuck\Exception\RuntimeException;
+use Conia\Http\Exception\RuntimeException;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\StreamFactory;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Conia\Http\Factory;
 
-use Conia\Chuck\Exception\RuntimeException;
-use Conia\Chuck\Factory;
+use Conia\Http\Exception\RuntimeException;
+use Conia\Http\Factory;
 use Psr\Http\Message\ResponseFactoryInterface as PsrResponseFactory;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
