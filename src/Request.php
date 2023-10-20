@@ -15,7 +15,6 @@ use Throwable;
 /** @psalm-api */
 class Request
 {
-    use WrapsMessage;
     use WrapsRequest;
 
     public function __construct(protected PsrServerRequest $psr)
@@ -95,6 +94,11 @@ class Request
         return $this->psr->getHeaderLine($name);
     }
 
+    public function headerArray(string $header): array
+    {
+        return $this->psr->getHeader($header);
+    }
+
     public function headers(bool $firstOnly = false): array
     {
         $headers = $this->psr->getHeaders();
@@ -109,9 +113,30 @@ class Request
         return $headers;
     }
 
-    public function accept(): array
+    public function setHeader(string $header, string $value): static
     {
-        return explode(',', $this->getHeaderLine('Accept'));
+        $this->psr = $this->psr->withHeader($header, $value);
+
+        return $this;
+    }
+
+    public function addHeader(string $header, string $value): static
+    {
+        $this->psr = $this->psr->withAddedHeader($header, $value);
+
+        return $this;
+    }
+
+    public function removeHeader(string $header): static
+    {
+        $this->psr = $this->psr->withoutHeader($header);
+
+        return $this;
+    }
+
+    public function hasHeader(string $header): bool
+    {
+        return $this->psr->hasHeader($header);
     }
 
     public function attributes(): array

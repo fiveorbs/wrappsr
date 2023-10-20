@@ -44,7 +44,7 @@ final class RequestTest extends TestCase
         $this->assertEquals('http://www.example.com', $request->origin());
     }
 
-    public function testRequestParam(): void
+    public function testParam(): void
     {
         $request = new Request($this->request(get: [
             'chuck' => 'schuldiner',
@@ -55,7 +55,7 @@ final class RequestTest extends TestCase
         $this->assertEquals('1967', $request->param('born'));
     }
 
-    public function testRequestHeader(): void
+    public function testHeader(): void
     {
         $request = new Request($this->request());
 
@@ -63,7 +63,15 @@ final class RequestTest extends TestCase
         $this->assertEquals('', $request->header('Does-Not-Exist'));
     }
 
-    public function testRequestHeaders(): void
+    public function testHeaderArray(): void
+    {
+        $request = new Request($this->request());
+
+        $this->assertEquals(['deflate, gzip;q=1.0, *;q=0.5'], $request->headerArray('Accept-Encoding'));
+        $this->assertEquals([], $request->headerArray('Does-Not-Exist'));
+    }
+
+    public function testHeaders(): void
     {
         $request = new Request($this->request());
 
@@ -71,7 +79,7 @@ final class RequestTest extends TestCase
         $this->assertEquals('deflate, gzip;q=1.0, *;q=0.5', $request->headers()['Accept-Encoding'][0]);
     }
 
-    public function testRequestHeadersFirstEntryOnly(): void
+    public function testHeadersFirstEntryOnly(): void
     {
         $request = new Request($this->request());
 
@@ -79,28 +87,29 @@ final class RequestTest extends TestCase
         $this->assertEquals('deflate, gzip;q=1.0, *;q=0.5', $request->headers(firstOnly: true)['Accept-Encoding']);
     }
 
-    public function testRequestAccept(): void
+    public function testWritingHeaders(): void
     {
         $request = new Request($this->request());
+        $request->setHeader('test-header', 'test-value');
+        $request->setHeader('test-header', 'test-value-replaced');
+        $request->addHeader('test-header', 'test-value-added');
 
-        $this->assertEquals([
-            'text/html',
-            'application/xhtml+xml',
-            'application/xml;q=0.9',
-            'image/avif',
-            'image/webp',
-            '*/*;q=0.8',
-        ], $request->accept());
+        $this->assertEquals('test-value-replaced, test-value-added', $request->header('test-header'));
+        $this->assertEquals(['test-value-replaced', 'test-value-added'], $request->headerArray('test-header'));
+
+        $request->removeHeader('test-header');
+
+        $this->assertEquals('', $request->header('test-header'));
     }
 
-    public function testRequestParamDefault(): void
+    public function testParamDefault(): void
     {
         $request = new Request($this->request());
 
         $this->assertEquals('the default', $request->param('doesnotexist', 'the default'));
     }
 
-    public function testRequestParamFailing(): void
+    public function testParamFailing(): void
     {
         $this->throws(OutOfBoundsException::class, 'Query string');
 
@@ -109,7 +118,7 @@ final class RequestTest extends TestCase
         $this->assertEquals(null, $request->param('doesnotexist'));
     }
 
-    public function testRequestParams(): void
+    public function testParams(): void
     {
         $request = new Request($this->request(
             get: ['chuck' => 'schuldiner', 'born' => '1967']
@@ -121,7 +130,7 @@ final class RequestTest extends TestCase
         $this->assertEquals('schuldiner', $params['chuck']);
     }
 
-    public function testRequestField(): void
+    public function testField(): void
     {
         $request = new Request($this->request(
             server: [
@@ -135,14 +144,14 @@ final class RequestTest extends TestCase
         $this->assertEquals('1967', $request->field('born'));
     }
 
-    public function testRequestFieldDefaultPostIsNull(): void
+    public function testFieldDefaultPostIsNull(): void
     {
         $request = new Request($this->request());
 
         $this->assertEquals('the default', $request->field('doesnotexist', 'the default'));
     }
 
-    public function testRequestFieldDefaultPostIsArray(): void
+    public function testFieldDefaultPostIsArray(): void
     {
         $request = new Request($this->request(
             server: [
@@ -155,7 +164,7 @@ final class RequestTest extends TestCase
         $this->assertEquals('the default', $request->field('doesnotexist', 'the default'));
     }
 
-    public function testRequestFieldFailing(): void
+    public function testFieldFailing(): void
     {
         $this->throws(OutOfBoundsException::class, 'Form field');
 
@@ -167,7 +176,7 @@ final class RequestTest extends TestCase
         $request->field('doesnotexist');
     }
 
-    public function testRequestForm(): void
+    public function testForm(): void
     {
         $request = new Request($this->request(
             server: [
@@ -183,7 +192,7 @@ final class RequestTest extends TestCase
         $this->assertEquals([ 'first_band' => 'Mantas', 'chuck' => 'schuldiner', ], $request->form());
     }
 
-    public function testRequestCookie(): void
+    public function testCookie(): void
     {
         $request = new Request($this->request(cookie: [
             'chuck' => 'schuldiner',
@@ -194,14 +203,14 @@ final class RequestTest extends TestCase
         $this->assertEquals('1967', $request->cookie('born'));
     }
 
-    public function testRequestCookieDefault(): void
+    public function testCookieDefault(): void
     {
         $request = new Request($this->request());
 
         $this->assertEquals('the default', $request->cookie('doesnotexist', 'the default'));
     }
 
-    public function testRequestCookieFailing(): void
+    public function testCookieFailing(): void
     {
         $this->throws(OutOfBoundsException::class, 'Cookie');
 
@@ -210,7 +219,7 @@ final class RequestTest extends TestCase
         $request->cookie('doesnotexist')->toBe(null);
     }
 
-    public function testRequestCookies(): void
+    public function testCookies(): void
     {
         $request = new Request($this->request(cookie: ['chuck' => 'schuldiner', 'born' => '1967']));
         $cookies = $request->cookies();
@@ -220,7 +229,7 @@ final class RequestTest extends TestCase
         $this->assertEquals('schuldiner', $cookies['chuck']);
     }
 
-    public function testRequestServer(): void
+    public function testServer(): void
     {
         $request = new Request($this->request());
 
@@ -228,14 +237,14 @@ final class RequestTest extends TestCase
         $this->assertEquals('HTTP/1.1', $request->server('SERVER_PROTOCOL'));
     }
 
-    public function testRequestServerDefault(): void
+    public function testServerDefault(): void
     {
         $request = new Request($this->request());
 
         $this->assertEquals('the default', $request->server('doesnotexist', 'the default'));
     }
 
-    public function testRequestServerFailing(): void
+    public function testServerFailing(): void
     {
         $this->throws(OutOfBoundsException::class, 'Server');
 
@@ -244,7 +253,7 @@ final class RequestTest extends TestCase
         $this->assertEquals(null, $request->server('doesnotexist'));
     }
 
-    public function testRequestServerParams(): void
+    public function testServerParams(): void
     {
         $request = new Request($this->request());
         $params = $request->serverParams();
@@ -253,14 +262,14 @@ final class RequestTest extends TestCase
         $this->assertEquals('HTTP/1.1', $params['SERVER_PROTOCOL']);
     }
 
-    public function testRequestGetDefault(): void
+    public function testGetDefault(): void
     {
         $request = new Request($this->request());
 
         $this->assertEquals('the default', $request->get('doesnotexist', 'the default'));
     }
 
-    public function testRequestGetFailing(): void
+    public function testGetFailing(): void
     {
         $this->throws(OutOfBoundsException::class, 'Request attribute');
 
@@ -269,7 +278,7 @@ final class RequestTest extends TestCase
         $this->assertEquals(null, $request->get('doesnotexist'));
     }
 
-    public function testRequestAttributes(): void
+    public function testAttributes(): void
     {
         $request = new Request($this->request());
         $request->withAttribute('one', 1)->set('two', '2');
@@ -279,12 +288,12 @@ final class RequestTest extends TestCase
         $this->assertEquals('2', $request->get('two'));
     }
 
-    public function testRequestBody(): void
+    public function testBody(): void
     {
         $this->assertEquals('', (string)(new Request($this->request()))->body());
     }
 
-    public function testRequestJson(): void
+    public function testJson(): void
     {
         $stream = Stream::create('[{"title": "Leprosy", "released": 1988}, {"title": "Human", "released": 1991}]');
         $request = new Request($this->request()->withBody($stream));
@@ -293,7 +302,7 @@ final class RequestTest extends TestCase
             ['title' => 'Human', 'released' => 1991], ], $request->json());
     }
 
-    public function testRequestJsonEmpty(): void
+    public function testJsonEmpty(): void
     {
         $request = new Request($this->request());
 
@@ -436,33 +445,6 @@ final class RequestTest extends TestCase
         $request->setPsr($psr);
 
         $this->assertEquals($psr, $request->psr());
-    }
-
-    public function testPsr7MessageWrapperMethods(): void
-    {
-        $request = new Request($this->request()
-            ->withProtocolVersion('2.0')
-            ->withHeader('test-header', 'test-value')
-            ->withHeader('test-header', 'test-value-replaced')
-            ->withAddedHeader('test-header', 'test-value-added'));
-
-        $origBody = $request->getBody();
-        $newBody = Stream::create('chuck');
-        $request->withBody($newBody);
-
-        $this->assertEquals('', (string)$origBody);
-        $this->assertEquals('chuck', (string)$newBody);
-        $this->assertEquals($newBody, $request->getBody());
-        $this->assertEquals('2.0', $request->getProtocolVersion());
-        $this->assertEquals(2, count($request->getHeaders()['test-header']));
-        $this->assertEquals('test-value-replaced', $request->getHeaders()['test-header'][0]);
-        $this->assertEquals('test-value-added', $request->getHeaders()['test-header'][1]);
-        $this->assertEquals('test-value-added', $request->getHeader('test-header')[1]);
-        $this->assertEquals('test-value-replaced, test-value-added', $request->getHeaderLine('test-header'));
-
-        $this->assertEquals(true, $request->hasHeader('test-header'));
-        $request->withoutHeader('test-header');
-        $this->assertEquals(false, $request->hasHeader('test-header'));
     }
 
     public function testPsr7ServerRequestWrapperMethods(): void
