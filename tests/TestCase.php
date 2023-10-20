@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Conia\Http\Tests;
 
+use Conia\Http\Factory;
+use Conia\Http\Factory\Nyholm;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase as BaseTestCase;
+use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
 
 /**
@@ -22,6 +25,18 @@ class TestCase extends BaseTestCase
         if ($message) {
             $this->expectExceptionMessage($message);
         }
+    }
+
+    public function factory(): Factory
+    {
+        return new Nyholm();
+    }
+
+    public function response(): PsrResponse
+    {
+        $factory = new Psr17Factory();
+
+        return $factory->createResponse();
     }
 
     public function request(

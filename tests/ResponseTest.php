@@ -4,33 +4,35 @@ declare(strict_types=1);
 
 namespace Conia\Http\Tests;
 
+use Conia\Http\Exception\FileNotFoundException;
 use Conia\Http\Exception\RuntimeException;
 use Conia\Http\Response;
-use Conia\Http\Tests\Setup\C;
-use Nyholm\Psr7\Stream;
+use stdClass;
 
 /**
  * @internal
  *
- * @covers \Conia\Http\Request
+ * @covers \Conia\Http\Response
  */
 final class ResponseTest extends TestCase
 {
+    public const FIXTURES = __DIR__ . '/Fixtures';
+
     public function testGetSetPsr7Response(): void
     {
-        $psr = $this->psrResponse();
+        $psr = $this->response();
         $response = new Response($psr);
 
         $this->assertEquals($psr, $response->psr());
 
-        $response->setPsr($this->psrResponse());
+        $response->setPsr($this->response());
 
-        expect($response->psr())->not->toBe($psr);
+        $this->assertNotSame($psr, $response->psr());
     }
 
     public function testGetStatusCode(): void
     {
-        $response = new Response($this->psrResponse());
+        $response = new Response($this->response());
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('OK', $response->getReasonPhrase());
@@ -38,7 +40,7 @@ final class ResponseTest extends TestCase
 
     public function testSetStatusCode(): void
     {
-        $response = new Response($this->psrResponse(), $this->factory());
+        $response = new Response($this->response(), $this->factory());
         $response->status(404);
 
         $this->assertEquals(404, $response->getStatusCode());
@@ -47,7 +49,7 @@ final class ResponseTest extends TestCase
 
     public function testSetStatusCodeAndReasonPhrase(): void
     {
-        $response = new Response($this->psrResponse(), $this->factory());
+        $response = new Response($this->response(), $this->factory());
         $response->status(404, 'Nothing to see');
 
         $this->assertEquals(404, $response->getStatusCode());
@@ -56,7 +58,7 @@ final class ResponseTest extends TestCase
 
     public function testProtocolVersion(): void
     {
-        $response = new Response($this->psrResponse(), $this->factory());
+        $response = new Response($this->response(), $this->factory());
 
         $this->assertEquals('1.1', $response->getProtocolVersion());
 
@@ -68,14 +70,14 @@ final class ResponseTest extends TestCase
     public function testCreateWithStringBody(): void
     {
         $text = 'text';
-        $response = (new Response($this->psrResponse(), $this->factory()))->write($text);
+        $response = (new Response($this->response(), $this->factory()))->write($text);
         $this->assertEquals($text, (string)$response->getBody());
     }
 
     public function testSetBody(): void
     {
         $stream = $this->factory()->stream('Chuck text');
-        $response = new Response($this->psrResponse());
+        $response = new Response($this->response());
         $response->body($stream);
         $this->assertEquals('Chuck text', (string)$response->getBody());
     }
@@ -86,13 +88,13 @@ final class ResponseTest extends TestCase
 
         $fh = fopen('php://temp', 'r+');
         fwrite($fh, 'Chuck resource');
-        $response = new Response($this->psrResponse());
+        $response = new Response($this->response());
         $response->body('fails');
     }
 
     public function testInitWithHeader(): void
     {
-        $response = new Response($this->psrResponse());
+        $response = new Response($this->response());
         $response->header('header-value', 'value');
 
         $this->assertEquals(true, $response->hasHeader('Header-Value'));
@@ -100,7 +102,7 @@ final class ResponseTest extends TestCase
 
     public function testGetHeader(): void
     {
-        $response = new Response($this->psrResponse(), $this->factory());
+        $response = new Response($this->response(), $this->factory());
         $response = $response->header('header-value', 'value');
 
         $this->assertEquals('value', $response->getHeader('Header-Value')[0]);
@@ -108,7 +110,7 @@ final class ResponseTest extends TestCase
 
     public function testRemoveHeader(): void
     {
-        $response = new Response($this->psrResponse(), $this->factory());
+        $response = new Response($this->response(), $this->factory());
         $response->header('header-value', 'value');
 
         $this->assertEquals(true, $response->hasHeader('Header-Value'));
@@ -120,7 +122,7 @@ final class ResponseTest extends TestCase
 
     public function testRedirectTemporary(): void
     {
-        $response = new Response($this->psrResponse(), $this->factory());
+        $response = new Response($this->response(), $this->factory());
         $response->redirect('/chuck');
 
         $this->assertEquals(302, $response->getStatusCode());
@@ -129,38 +131,11 @@ final class ResponseTest extends TestCase
 
     public function testRedirectPermanent(): void
     {
-        $response = new Response($this->psrResponse(), $this->factory());
+        $response = new Response($this->response(), $this->factory());
         $response->redirect('/chuck', 301);
 
         $this->assertEquals(301, $response->getStatusCode());
         $this->assertEquals('/chuck', $response->getHeader('Location')[0]);
-    }
-
-    public function testPsr7MessageWrapperMethods(): void
-    {
-        $response = new Response($this->psrResponse(), $this->factory());
-        $response->withProtocolVersion('2.0')
-            ->withHeader('test-header', 'test-value')
-            ->withHeader('test-header', 'test-value-replaced')
-            ->withAddedHeader('test-header', 'test-value-added');
-
-        $origBody = $response->getBody();
-        $newBody = Stream::create('chuck');
-        $response->withBody($newBody);
-
-        $this->assertEquals('', (string)$origBody);
-        $this->assertEquals('chuck', (string)$newBody);
-        $this->assertEquals($newBody, $response->getBody());
-        $this->assertEquals('2.0', $response->getProtocolVersion());
-        $this->assertEquals(2, count($response->getHeaders()['test-header']));
-        $this->assertEquals('test-value-replaced', $response->getHeaders()['test-header'][0]);
-        $this->assertEquals('test-value-added', $response->getHeaders()['test-header'][1]);
-        $this->assertEquals('test-value-added', $response->getHeader('test-header')[1]);
-        $this->assertEquals('test-value-replaced, test-value-added', $response->getHeaderLine('test-header'));
-
-        $this->assertEquals(true, $response->hasHeader('test-header'));
-        $response->withoutHeader('test-header');
-        $this->assertEquals(false, $response->hasHeader('test-header'));
     }
 
     public function testHtmlResponse(): void
@@ -221,7 +196,15 @@ final class ResponseTest extends TestCase
     public function testJsonResponseTraversable(): void
     {
         $response = Response::fromFactory($this->factory())
-            ->json(_testJsonRendererIterator());
+            ->json(
+                (function () {
+                    $arr = [13, 31, 73];
+
+                    foreach ($arr as $a) {
+                        yield $a;
+                    }
+                })()
+            );
 
         $this->assertEquals('[13,31,73]', (string)$response->getBody());
         $this->assertEquals('application/json', $response->getHeader('Content-Type')[0]);
@@ -229,29 +212,29 @@ final class ResponseTest extends TestCase
 
     public function testFileResponse(): void
     {
-        $file = C::root() . '/public/static/image.jpg';
+        $file = self::FIXTURES . '/image.webp';
         $response = Response::fromFactory($this->factory())->file($file);
 
-        $this->assertEquals('image/jpeg', $response->getHeader('Content-Type')[0]);
+        $this->assertEquals('image/webp', $response->getHeader('Content-Type')[0]);
         $this->assertEquals((string)filesize($file), $response->getHeader('Content-Length')[0]);
     }
 
     public function testFileDownloadResponse(): void
     {
-        $file = C::root() . '/public/static/image.jpg';
+        $file = self::FIXTURES . '/image.webp';
         $response = Response::fromFactory($this->factory())->download($file);
 
-        $this->assertEquals('image/jpeg', $response->getHeader('Content-Type')[0]);
+        $this->assertEquals('image/webp', $response->getHeader('Content-Type')[0]);
         $this->assertEquals((string)filesize($file), $response->getHeader('Content-Length')[0]);
-        $this->assertEquals('attachment; filename="image.jpg"', $response->getHeader('Content-Disposition')[0]);
+        $this->assertEquals('attachment; filename="image.webp"', $response->getHeader('Content-Disposition')[0]);
     }
 
     public function testFileDownloadResponseWithChangedName(): void
     {
-        $file = C::root() . '/public/static/image.jpg';
+        $file = self::FIXTURES . '/image.webp';
         $response = Response::fromFactory($this->factory())->download($file, 'newname.jpg');
 
-        $this->assertEquals('image/jpeg', $response->getHeader('Content-Type')[0]);
+        $this->assertEquals('image/webp', $response->getHeader('Content-Type')[0]);
         $this->assertEquals((string)filesize($file), $response->getHeader('Content-Length')[0]);
         $this->assertEquals('attachment; filename="newname.jpg"', $response->getHeader('Content-Disposition')[0]);
     }
@@ -260,7 +243,7 @@ final class ResponseTest extends TestCase
     {
         $_SERVER['SERVER_SOFTWARE'] = 'nginx';
 
-        $file = C::root() . '/public/static/image.jpg';
+        $file = self::FIXTURES . '/image.webp';
         $response = Response::fromFactory($this->factory())->sendfile($file);
 
         $this->assertEquals($file, $response->getHeader('X-Accel-Redirect')[0]);
@@ -276,9 +259,9 @@ final class ResponseTest extends TestCase
 
     public function testFileResponseNonexistentFileWithRuntimeError(): void
     {
-        $this->throws(RuntimeException::class, 'File not found');
+        $this->throws(FileNotFoundException::class, 'File not found');
 
-        $file = C::root() . '/public/static/pixel.jpg';
-        Response::fromFactory($this->factory())->file($file, throwNotFound: false);
+        $file = self::FIXTURES . '/public/static/pixel.jpg';
+        Response::fromFactory($this->factory())->file($file);
     }
 }

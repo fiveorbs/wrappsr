@@ -24,7 +24,7 @@
         "psr/http-server-middleware": "^1.0"
     },
     "require-dev": {
-        "conia/development": "^1.0.1",
+        "conia/development": "^1.0.2",
         "dealerdirect/phpcodesniffer-composer-installer": "^1",
         "guzzlehttp/psr7": "^2",
         "laminas/laminas-diactoros": "^2",

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Conia\Http;
 
+use Conia\Http\Exception\FileNotFoundException;
 use Conia\Http\Exception\RuntimeException;
 use Conia\Http\Factory;
 use finfo;
@@ -56,6 +57,11 @@ class Response
     public function getReasonPhrase(): string
     {
         return $this->psr->getReasonPhrase();
+    }
+
+    public function getProtocolVersion(): string
+    {
+        return $this->psr->getProtocolVersion();
     }
 
     public function protocolVersion(string $protocol): static
@@ -185,11 +191,10 @@ class Response
 
     public function file(
         string $file,
-        bool $throwNotFound = true,
         int $code = 200,
         string $reasonPhrase = '',
     ): static {
-        $this->validateFile($file, $throwNotFound);
+        $this->validateFile($file);
 
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $contentType = $finfo->file($file);
@@ -216,11 +221,10 @@ class Response
     public function download(
         string $file,
         string $newName = '',
-        bool $throwNotFound = true,
         int $code = 200,
         string $reasonPhrase = '',
     ): static {
-        $response = $this->file($file, $throwNotFound, $code, $reasonPhrase);
+        $response = $this->file($file, $code, $reasonPhrase);
         $response->header(
             'Content-Disposition',
             'attachment; filename="' . ($newName ?: basename($file)) . '"'
@@ -231,11 +235,10 @@ class Response
 
     public function sendfile(
         string $file,
-        bool $throwNotFound = true,
         int $code = 200,
         string $reasonPhrase = '',
     ): static {
-        $this->validateFile($file, $throwNotFound);
+        $this->validateFile($file);
         $server = strtolower($_SERVER['SERVER_SOFTWARE'] ?? '');
         $this->psr = $this->psr->withStatus($code, $reasonPhrase);
 
@@ -251,7 +254,7 @@ class Response
     protected function validateFile(string $file): void
     {
         if (!is_file($file)) {
-            throw new RuntimeException('File not found');
+            throw new FileNotFoundException('File not found: ' . $file);
         }
     }
 }
