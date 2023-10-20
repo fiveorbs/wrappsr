@@ -33,7 +33,7 @@ class TestCase extends BaseTestCase
         array $cookie = [],
         array $post = [],
         array $get = [],
-        array $files = [],
+        array $files = null,
         mixed $body = null
     ): PsrServerRequest {
         $headers = array_merge([
@@ -45,7 +45,7 @@ class TestCase extends BaseTestCase
             'referer' => 'https://previous.example.com',
             'user-agent' => 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6 ( .NET CLR 3.5.30729)',
         ], $headers);
-        error_log(print_r($headers, true));
+        // error_log(print_r($headers, true));
 
         $server = array_merge([
             'DOCUMENT_ROOT' => '/var/www/',
@@ -79,7 +79,7 @@ class TestCase extends BaseTestCase
             'authenticated' => 'true',
         ], $cookie);
 
-        $files = array_merge($this->getFile(), $files);
+        $files = array_merge($files ?: $this->getFile());
 
         $factory = new Psr17Factory();
 
@@ -160,7 +160,7 @@ class TestCase extends BaseTestCase
         }
     }
 
-    protected function getFile(): array
+    public function getFile(): array
     {
         return [
             'myfile' => [
@@ -189,7 +189,7 @@ class TestCase extends BaseTestCase
         ];
     }
 
-    protected function getFiles(): array
+    public function getFiles(): array
     {
         return [
             'myfile' => [

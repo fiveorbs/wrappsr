@@ -201,6 +201,7 @@ class Request
             return $files;
         }
 
+        // Walk into the uploaded files structure
         foreach ($keys as $key) {
             if (array_key_exists($key, $files)) {
                 // /**
@@ -209,13 +210,21 @@ class Request
                 // * Psalm does not support recursive types like:
                 // *     T = array<string, string|T>
                 // */
-                $result[] = $files[$key];
+                $files = $files[$key];
             } else {
                 throw new OutOfBoundsException('Invalid files key ' . $this->formatKeys($keys));
             }
         }
 
-        return $result;
+        // Check if it is a single file upload.
+        // A multifile upload would already produce an array
+        if ($files instanceof PsrUploadedFile) {
+            return [$files];
+        }
+
+        assert(is_array($files));
+
+        return $files;
     }
 
     /**
@@ -269,17 +278,17 @@ class Request
         string $error,
         int $numArgs
     ): mixed {
-        try {
-            if ((is_null($array) || !isset($array[$key])) && $numArgs > 1) {
-                return $default;
-            }
-
-            assert(!is_null($array));
-
-            return $array[$key];
-        } catch (Throwable) {
-            throw new OutOfBoundsException("{$error}: '{$key}'");
+        if ((is_null($array) || !array_key_exists($key, $array)) && $numArgs > 1) {
+            return $default;
         }
+
+        assert(!is_null($array));
+
+        if (array_key_exists($key, $array)) {
+            return $array[$key];
+        }
+
+        throw new OutOfBoundsException("{$error}: '{$key}'");
     }
 
     /** @psalm-param non-empty-list<string> $keys */

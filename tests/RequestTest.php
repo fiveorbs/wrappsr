@@ -281,7 +281,6 @@ final class RequestTest extends TestCase
 
     public function testGetFileInstance(): void
     {
-        $this->setupFile();
         $request = new Request($this->request());
         $file = $request->file('myfile');
 
@@ -292,14 +291,12 @@ final class RequestTest extends TestCase
     {
         $this->throws(RuntimeException::class, 'No file key');
 
-        $this->setupFile();
         $request = new Request($this->request());
         $request->file();
     }
 
     public function testGetNestedFileInstance(): void
     {
-        $this->setupFile();
         $request = new Request($this->request());
         $file = $request->file('nested', 'myfile');
 
@@ -308,8 +305,7 @@ final class RequestTest extends TestCase
 
     public function testGetAllFiles(): void
     {
-        $this->setupFiles(); // files array
-        $request = new Request($this->request());
+        $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files();
 
         $this->assertEquals(2, count($files));
@@ -319,8 +315,7 @@ final class RequestTest extends TestCase
 
     public function testGetFilesInstances(): void
     {
-        $this->setupFiles(); // files array
-        $request = new Request($this->request());
+        $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files('myfile');
 
         $this->assertEquals(2, count($files));
@@ -330,8 +325,7 @@ final class RequestTest extends TestCase
 
     public function testGetNestedFilesInstances(): void
     {
-        $this->setupFiles(); // files array
-        $request = new Request($this->request());
+        $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files('nested', 'myfile');
 
         $this->assertEquals(2, count($files));
@@ -341,8 +335,7 @@ final class RequestTest extends TestCase
 
     public function testGetNestedFilesInstancesUsingAnArray(): void
     {
-        $this->setupFiles(); // files array
-        $request = new Request($this->request());
+        $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files(['nested', 'myfile']);
 
         $this->assertEquals(2, count($files));
@@ -352,7 +345,6 @@ final class RequestTest extends TestCase
 
     public function testGetFilesInstancesWithOnlyOnePresent(): void
     {
-        $this->setupFile();
         $request = new Request($this->request());
         $files = $request->files('myfile');
 
@@ -364,8 +356,7 @@ final class RequestTest extends TestCase
     {
         $this->throws(RuntimeException::class, 'Multiple files');
 
-        $this->setupFiles();
-        $request = new Request($this->request());
+        $request = new Request($this->request(files: $this->getFiles()));
         $request->file('myfile');
     }
 
@@ -381,7 +372,6 @@ final class RequestTest extends TestCase
     {
         $this->throws(OutOfBoundsException::class, "Invalid file key (too deep) ['nested']['myfile']['toomuch']");
 
-        $this->setupFile();
         $request = new Request($this->request());
         $request->file('nested', 'myfile', 'toomuch');
     }
@@ -390,7 +380,6 @@ final class RequestTest extends TestCase
     {
         $this->throws(RuntimeException::class, 'Either provide');
 
-        $this->setupFiles();
         $request = new Request($this->request());
         $request->files([], []);
     }
@@ -411,7 +400,6 @@ final class RequestTest extends TestCase
         $request->files('does-not-exist');
     }
 
-    /** @group only */
     public function testNestedFileInstancesAreNotAvailable(): void
     {
         $this->throws(OutOfBoundsException::class, "Invalid files key ['does-not-exist']['really']");
