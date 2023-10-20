@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Conia\Http\Tests;
 
 use Nyholm\Psr7\Factory\Psr17Factory;
-use Conia\Http\Request;
 use PHPUnit\Framework\TestCase as BaseTestCase;
-// use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
-use ValueError;
 
 /**
  * @internal
@@ -41,7 +38,7 @@ class TestCase extends BaseTestCase
             'accept-encoding' => 'deflate, gzip;q=1.0, *;q=0.5',
             'accept-language' => 'en-US,en;q=0.7,de;q=0.3',
             'connection' => 'keep-alive',
-            'Host' => 'www.example.com',
+            'host' => 'www.example.com',
             'referer' => 'https://previous.example.com',
             'user-agent' => 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6 ( .NET CLR 3.5.30729)',
         ], $headers);
@@ -75,10 +72,6 @@ class TestCase extends BaseTestCase
             'SERVER_SOFTWARE' => 'nginx/1.22.1',
         ], $server);
 
-        $cookie = array_merge([
-            'authenticated' => 'true',
-        ], $cookie);
-
         $files = array_merge($files ?: $this->getFile());
 
         $factory = new Psr17Factory();
@@ -93,71 +86,6 @@ class TestCase extends BaseTestCase
         $request = $creator->fromArrays($server, $headers, $cookie, $get, $post, $files, $body);
 
         return $request;
-    }
-
-    public function set(string $method, array $values): void
-    {
-        global $_GET;
-        global $_POST;
-        global $_COOKIE;
-
-        foreach ($values as $key => $value) {
-            if (strtoupper($method) === 'GET') {
-                $_GET[$key] = $value;
-
-                continue;
-            }
-
-            if (strtoupper($method) === 'POST') {
-                $_POST[$key] = $value;
-
-                continue;
-            }
-
-            if (strtoupper($method) === 'COOKIE') {
-                $_COOKIE[$key] = $value;
-            } else {
-                throw new ValueError("Invalid method '{$method}'");
-            }
-        }
-    }
-
-    public function setQueryString(string $qs): void
-    {
-        $_SERVER['QUERY_STRING'] = $qs;
-    }
-
-    public function enableHttps(?string $serverKey = null): void
-    {
-        if ($serverKey) {
-            $_SERVER[$serverKey] = 'https';
-        } else {
-            $_SERVER['HTTPS'] = 'on';
-        }
-    }
-
-    public function disableHttps(): void
-    {
-        unset($_SERVER['HTTPS'], $_SERVER['REQUEST_SCHEME'], $_SERVER['HTTP_X_FORWARDED_PROTO']);
-    }
-
-    public function setMethod(string $method): void
-    {
-        $_SERVER['REQUEST_METHOD'] = strtoupper($method);
-    }
-
-    public function setContentType(string $contentType): void
-    {
-        $_SERVER['HTTP_CONTENT_TYPE'] = $contentType;
-    }
-
-    public function setRequestUri(string $url): void
-    {
-        if (substr($url, 0, 1) === '/') {
-            $_SERVER['REQUEST_URI'] = $url;
-        } else {
-            $_SERVER['REQUEST_URI'] = "/{$url}";
-        }
     }
 
     public function getFile(): array
