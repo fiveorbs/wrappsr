@@ -442,8 +442,8 @@ final class RequestTest extends TestCase
     {
         $psr = $this->request();
         $request = new Request($this->request());
-        $request->setPsr($psr);
+        $request->wrap($psr);
 
-        $this->assertEquals($psr, $request->psr());
+        $this->assertEquals($psr, $request->unwrap());
     }
 }
