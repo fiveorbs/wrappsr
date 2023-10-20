@@ -84,7 +84,13 @@ final class RequestTest extends TestCase
         $request = new Request($this->request());
 
         $this->assertEquals([
-            'text/html', 'application/xhtml+xml', 'text/plain', ], $request->accept());
+            'text/html',
+            'application/xhtml+xml',
+            'application/xml;q=0.9',
+            'image/avif',
+            'image/webp',
+            '*/*;q=0.8',
+        ], $request->accept());
     }
 
     public function testRequestParamDefault(): void
@@ -105,8 +111,9 @@ final class RequestTest extends TestCase
 
     public function testRequestParams(): void
     {
-        $this->set('GET', ['chuck' => 'schuldiner', 'born' => '1967']);
-        $request = new Request($this->request());
+        $request = new Request($this->request(
+            get: ['chuck' => 'schuldiner', 'born' => '1967']
+        ));
         $params = $request->params();
 
         $this->assertEquals(2, count($params));
@@ -116,28 +123,34 @@ final class RequestTest extends TestCase
 
     public function testRequestField(): void
     {
-        $this->setContentType('application/x-www-form-urlencoded');
-        $this->setMethod('POST');
-        $this->set('POST', ['chuck' => 'schuldiner', 'born' => '1967']);
-        $request = new Request($this->request());
+        $request = new Request($this->request(
+            server: [
+                'HTTP_CONTENT_TYPE' => 'application/x-www-form-urlencoded',
+                'REQUEST_METHOD' => 'POST',
+            ],
+            post: ['chuck' => 'schuldiner', 'born' => '1967']
+        ));
 
         $this->assertEquals('schuldiner', $request->field('chuck'));
         $this->assertEquals('1967', $request->field('born'));
     }
 
-    public function testRequestFieldDefaultPOSTIsNull(): void
+    public function testRequestFieldDefaultPostIsNull(): void
     {
         $request = new Request($this->request());
 
         $this->assertEquals('the default', $request->field('doesnotexist', 'the default'));
     }
 
-    public function testRequestFieldDefaultPOSTIsArray(): void
+    public function testRequestFieldDefaultPostIsArray(): void
     {
-        $this->setContentType('application/x-www-form-urlencoded');
-        $this->setMethod('POST');
-        $this->set('POST', ['chuck' => 'schuldiner']);
-        $request = new Request($this->request());
+        $request = new Request($this->request(
+            server: [
+                'HTTP_CONTENT_TYPE' => 'application/x-www-form-urlencoded',
+                'REQUEST_METHOD' => 'POST',
+            ],
+            post: ['chuck' => 'schuldiner']
+        ));
 
         $this->assertEquals('the default', $request->field('doesnotexist', 'the default'));
     }
@@ -146,27 +159,36 @@ final class RequestTest extends TestCase
     {
         $this->throws(OutOfBoundsException::class, 'Form field');
 
-        $this->setContentType('application/x-www-form-urlencoded');
-        $this->setMethod('POST');
-        $request = new Request($this->request());
+        $request = new Request($this->request(server: [
+            'HTTP_CONTENT_TYPE' => 'application/x-www-form-urlencoded',
+            'REQUEST_METHOD' => 'POST',
+        ]));
 
         $request->field('doesnotexist');
     }
 
     public function testRequestForm(): void
     {
-        $this->setContentType('application/x-www-form-urlencoded');
-        $this->setMethod('POST');
-        $this->set('POST', ['first_band' => 'Mantas', 'chuck' => 'schuldiner']);
-        $request = new Request($this->request());
+        $request = new Request($this->request(
+            server: [
+                'HTTP_CONTENT_TYPE' => 'application/x-www-form-urlencoded',
+                'REQUEST_METHOD' => 'POST',
+            ],
+            post: [
+                'first_band' => 'Mantas',
+                'chuck' => 'schuldiner',
+            ]
+        ));
 
         $this->assertEquals([ 'first_band' => 'Mantas', 'chuck' => 'schuldiner', ], $request->form());
     }
 
     public function testRequestCookie(): void
     {
-        $this->set('COOKIE', ['chuck' => 'schuldiner', 'born' => '1967']);
-        $request = new Request($this->request());
+        $request = new Request($this->request(cookie: [
+            'chuck' => 'schuldiner',
+            'born' => '1967',
+        ]));
 
         $this->assertEquals('schuldiner', $request->cookie('chuck'));
         $this->assertEquals('1967', $request->cookie('born'));
@@ -190,8 +212,7 @@ final class RequestTest extends TestCase
 
     public function testRequestCookies(): void
     {
-        $this->set('COOKIE', ['chuck' => 'schuldiner', 'born' => '1967']);
-        $request = new Request($this->request());
+        $request = new Request($this->request(cookie: ['chuck' => 'schuldiner', 'born' => '1967']));
         $cookies = $request->cookies();
 
         $this->assertEquals(2, count($cookies));
@@ -223,7 +244,7 @@ final class RequestTest extends TestCase
         $this->assertEquals(null, $request->server('doesnotexist'));
     }
 
-    public function testRequestServers(): void
+    public function testRequestServerParams(): void
     {
         $request = new Request($this->request());
         $params = $request->serverParams();

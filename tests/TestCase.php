@@ -34,27 +34,26 @@ class TestCase extends BaseTestCase
         mixed $body = null
     ): PsrServerRequest {
         $headers = array_merge([
-            'accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'accept-encoding' => 'deflate, gzip;q=1.0, *;q=0.5',
-            'accept-language' => 'en-US,en;q=0.7,de;q=0.3',
-            'connection' => 'keep-alive',
-            'host' => 'www.example.com',
-            'referer' => 'https://previous.example.com',
-            'user-agent' => 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6 ( .NET CLR 3.5.30729)',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Encoding' => 'deflate, gzip;q=1.0, *;q=0.5',
+            'Accept-Language' => 'en-US,en;q=0.7,de;q=0.3',
+            'Connection' => 'keep-alive',
+            'Host' => 'www.example.com',
+            'Referer' => 'https://previous.example.com',
+            'User-Agent' => 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6 ( .NET CLR 3.5.30729)',
         ], $headers);
-        // error_log(print_r($headers, true));
 
         $server = array_merge([
             'DOCUMENT_ROOT' => '/var/www/',
             'GATEWAY_INTERFACE' => 'CGI/1.1',
             'HTTPS' => '1',
-            'HTTP_ACCEPT' => $headers['accept'],
-            'HTTP_ACCEPT_ENCODING' => $headers['accept-encoding'],
-            'HTTP_ACCEPT_LANGUAGE' => $headers['accept-language'],
-            'HTTP_CONNECTION' => $headers['connection'],
-            'HTTP_HOST' => $headers['host'],
-            'HTTP_REFERER' => $headers['referer'],
-            'HTTP_USER_AGENT' => $headers['user-agent'],
+            'HTTP_ACCEPT' => $headers['Accept'],
+            'HTTP_ACCEPT_ENCODING' => $headers['Accept-Encoding'],
+            'HTTP_ACCEPT_LANGUAGE' => $headers['Accept-Language'],
+            'HTTP_CONNECTION' => $headers['Connection'],
+            'HTTP_HOST' => $headers['Host'],
+            'HTTP_REFERER' => $headers['Referer'],
+            'HTTP_USER_AGENT' => $headers['User-Agent'],
             'PHP_SELF' => '/albums/index.php',
             'REMOTE_ADDR' => '217.254.27.52',
             'REMOTE_PORT' => '73231',
