@@ -66,7 +66,6 @@ final class RequestTest extends TestCase
     public function testRequestHeaders(): void
     {
         $request = new Request($this->request());
-        error_log(print_r($request->headers(), true));
 
         $this->assertEquals('www.example.com', $request->headers()['Host'][0]);
         $this->assertEquals('deflate, gzip;q=1.0, *;q=0.5', $request->headers()['Accept-Encoding'][0]);
@@ -412,6 +411,7 @@ final class RequestTest extends TestCase
         $request->files('does-not-exist');
     }
 
+    /** @group only */
     public function testNestedFileInstancesAreNotAvailable(): void
     {
         $this->throws(OutOfBoundsException::class, "Invalid files key ['does-not-exist']['really']");

@@ -79,15 +79,7 @@ class TestCase extends BaseTestCase
             'authenticated' => 'true',
         ], $cookie);
 
-        $files = array_merge([
-            'file' => [
-                'name' => 'file.txt',
-                'type' => 'text/plain',
-                'tmp_name' => '/tmp/file_xyz',
-                'error' => UPLOAD_ERR_OK,
-                'size' => 666,
-            ],
-        ], $files);
+        $files = array_merge($this->getFile(), $files);
 
         $factory = new Psr17Factory();
 
@@ -98,7 +90,9 @@ class TestCase extends BaseTestCase
             $factory  // StreamFactory
         );
 
-        return $creator->fromArrays($server, $headers, $cookie, $get, $post, $files, $body);
+        $request = $creator->fromArrays($server, $headers, $cookie, $get, $post, $files, $body);
+
+        return $request;
     }
 
     public function set(string $method, array $values): void
@@ -166,11 +160,9 @@ class TestCase extends BaseTestCase
         }
     }
 
-    public function setupFile()
+    protected function getFile(): array
     {
-        global $_FILES;
-
-        $_FILES = [
+        return [
             'myfile' => [
                 'error' => UPLOAD_ERR_OK,
                 'name' => '../malic/chuck-test-file.php',
@@ -197,11 +189,9 @@ class TestCase extends BaseTestCase
         ];
     }
 
-    public function setupFiles()
+    protected function getFiles(): array
     {
-        global $_FILES;
-
-        $_FILES = [
+        return [
             'myfile' => [
                 'error' => [UPLOAD_ERR_OK, UPLOAD_ERR_PARTIAL],
                 'name' => ['test.php', 'test2.php'],
