@@ -16,7 +16,7 @@ use Traversable;
 class Response
 {
     public function __construct(
-        protected PsrResponse $psr,
+        protected PsrResponse $psrResponse,
         protected readonly Factory|null $factory = null,
     ) {
     }
@@ -26,14 +26,14 @@ class Response
         return new self($factory->response(), $factory);
     }
 
-    public function psr(): PsrResponse
+    public function unwrap(): PsrResponse
     {
-        return $this->psr;
+        return $this->psrResponse;
     }
 
-    public function setPsr(PsrResponse $psr): static
+    public function wrap(PsrResponse $response): static
     {
-        $this->psr = $psr;
+        $this->psrResponse = $response;
 
         return $this;
     }
@@ -41,9 +41,9 @@ class Response
     public function status(int $statusCode, ?string $reasonPhrase = null): static
     {
         if (empty($reasonPhrase)) {
-            $this->psr = $this->psr->withStatus($statusCode);
+            $this->psrResponse = $this->psrResponse->withStatus($statusCode);
         } else {
-            $this->psr = $this->psr->withStatus($statusCode, $reasonPhrase);
+            $this->psrResponse = $this->psrResponse->withStatus($statusCode, $reasonPhrase);
         }
 
         return $this;
@@ -51,65 +51,65 @@ class Response
 
     public function getStatusCode(): int
     {
-        return $this->psr->getStatusCode();
+        return $this->psrResponse->getStatusCode();
     }
 
     public function getReasonPhrase(): string
     {
-        return $this->psr->getReasonPhrase();
+        return $this->psrResponse->getReasonPhrase();
     }
 
     public function getProtocolVersion(): string
     {
-        return $this->psr->getProtocolVersion();
+        return $this->psrResponse->getProtocolVersion();
     }
 
     public function protocolVersion(string $protocol): static
     {
-        $this->psr = $this->psr->withProtocolVersion($protocol);
+        $this->psrResponse = $this->psrResponse->withProtocolVersion($protocol);
 
         return $this;
     }
 
     public function header(string $name, string $value): static
     {
-        $this->psr = $this->psr->withAddedHeader($name, $value);
+        $this->psrResponse = $this->psrResponse->withAddedHeader($name, $value);
 
         return $this;
     }
 
     public function removeHeader(string $name): static
     {
-        $this->psr = $this->psr->withoutHeader($name);
+        $this->psrResponse = $this->psrResponse->withoutHeader($name);
 
         return $this;
     }
 
     public function headers(): array
     {
-        return $this->psr->getHeaders();
+        return $this->psrResponse->getHeaders();
     }
 
     public function getHeader(string $name): array
     {
-        return $this->psr->getHeader($name);
+        return $this->psrResponse->getHeader($name);
     }
 
     public function hasHeader(string $name): bool
     {
-        return $this->psr->hasHeader($name);
+        return $this->psrResponse->hasHeader($name);
     }
 
     public function body(PsrStream|string $body): static
     {
         if ($body instanceof PsrStream) {
-            $this->psr = $this->psr->withBody($body);
+            $this->psrResponse = $this->psrResponse->withBody($body);
 
             return $this;
         }
 
         if ($this->factory) {
-            $this->psr = $this->psr->withBody($this->factory->stream($body));
+            $this->psrResponse = $this->psrResponse->withBody($this->factory->stream($body));
 
             return $this;
         }
@@ -119,12 +119,12 @@ class Response
 
     public function getBody(): PsrStream
     {
-        return $this->psr->getBody();
+        return $this->psrResponse->getBody();
     }
 
     public function write(string $content): static
     {
-        $this->psr->getBody()->write($content);
+        $this->psrResponse->getBody()->write($content);
 
         return $this;
     }
@@ -146,13 +146,13 @@ class Response
         int $code = 200,
         string $reasonPhrase = ''
     ): static {
-        $this->psr = $this->psr
+        $this->psrResponse = $this->psrResponse
             ->withStatus($code, $reasonPhrase)
             ->withAddedHeader('Content-Type', $contentType);
 
         if ($body) {
             assert(isset($this->factory));
-            $this->psr = $this->psr->withBody($this->factory->stream($body));
+            $this->psrResponse = $this->psrResponse->withBody($this->factory->stream($body));
         }
 
         return $this;
@@ -203,7 +203,7 @@ class Response
         assert(isset($this->factory));
         $stream = $this->factory->streamFromFile($file, 'rb');
 
-        $this->psr = $this->psr
+        $this->psrResponse = $this->psrResponse
             ->withStatus($code, $reasonPhrase)
             ->withAddedHeader('Content-Type', $contentType)
             ->withAddedHeader('Content-Transfer-Encoding', $encoding)
@@ -212,7 +212,7 @@ class Response
         $size = $stream->getSize();
 
         if (!is_null($size)) {
-            $this->psr = $this->psr->withAddedHeader('Content-Length', (string)$size);
+            $this->psrResponse = $this->psrResponse->withAddedHeader('Content-Length', (string)$size);
         }
 
         return $this;
@@ -240,12 +240,12 @@ class Response
     ): static {
         $this->validateFile($file);
         $server = strtolower($_SERVER['SERVER_SOFTWARE'] ?? '');
-        $this->psr = $this->psr->withStatus($code, $reasonPhrase);
+        $this->psrResponse = $this->psrResponse->withStatus($code, $reasonPhrase);
 
         if (strpos($server, 'nginx') !== false) {
-            $this->psr = $this->psr->withAddedHeader('X-Accel-Redirect', $file);
+            $this->psrResponse = $this->psrResponse->withAddedHeader('X-Accel-Redirect', $file);
         } else {
-            $this->psr = $this->psr->withAddedHeader('X-Sendfile', $file);
+            $this->psrResponse = $this->psrResponse->withAddedHeader('X-Sendfile', $file);
         }
 
         return $this;

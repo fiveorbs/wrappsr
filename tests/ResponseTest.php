@@ -23,11 +23,11 @@ final class ResponseTest extends TestCase
         $psr = $this->response();
         $response = new Response($psr);
 
-        $this->assertEquals($psr, $response->psr());
+        $this->assertEquals($psr, $response->unwrap());
 
-        $response->setPsr($this->response());
+        $response->wrap($this->response());
 
-        $this->assertNotSame($psr, $response->psr());
+        $this->assertNotSame($psr, $response->unwrap());
     }
 
     public function testGetStatusCode(): void
