@@ -1,16 +1,16 @@
-Conia Http
-==========
+Conia PSR Wrappers
+==================
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
-[![Coverage Status](https://img.shields.io/scrutinizer/coverage/g/coniadev/http.svg)](https://scrutinizer-ci.com/g/coniadev/http/code-structure)
-[![Psalm coverage](https://shepherd.dev/github/coniadev/http/coverage.svg?)](https://shepherd.dev/github/coniadev/http)
-[![Psalm level](https://shepherd.dev/github/coniadev/http/level.svg?)](https://conia.dev/http)
-[![Quality Score](https://img.shields.io/scrutinizer/g/coniadev/http.svg)](https://scrutinizer-ci.com/g/coniadev/http)
+[![Coverage Status](https://img.shields.io/scrutinizer/coverage/g/coniadev/wrappsr.svg)](https://scrutinizer-ci.com/g/coniadev/wrappsr/code-structure)
+[![Psalm coverage](https://shepherd.dev/github/coniadev/wrappsr/coverage.svg?)](https://shepherd.dev/github/coniadev/wrappsr)
+[![Psalm level](https://shepherd.dev/github/coniadev/wrappsr/level.svg?)](https://conia.dev/wrappsr)
+[![Quality Score](https://img.shields.io/scrutinizer/g/coniadev/wrappsr.svg)](https://scrutinizer-ci.com/g/coniadev/wrappsr)
 
 Convenience wrappers for PSR-7/PSR-17 implementations.
 
 ## License
 
-Conia Http is released under the MIT [license](LICENSE.md).
+Conia PSR Wrappers are released under the MIT [license](LICENSE.md).
 
 Copyright © 2023 ebene fünf GmbH. All rights reserved.
