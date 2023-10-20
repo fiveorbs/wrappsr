@@ -10,13 +10,10 @@ use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
 use Psr\Http\Message\StreamInterface as PsrStream;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
 use Psr\Http\Message\UriInterface as PsrUri;
-use Throwable;
 
 /** @psalm-api */
 class Request
 {
-    use WrapsRequest;
-
     public function __construct(protected PsrServerRequest $psr)
     {
     }
@@ -173,6 +170,11 @@ class Request
         $origin .= $authority ? '//' . $authority : '';
 
         return $origin;
+    }
+
+    public function target(): string
+    {
+        return $this->psr->getRequestTarget();
     }
 
     public function method(): string

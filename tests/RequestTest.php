@@ -8,7 +8,6 @@ use Conia\Http\Exception\OutOfBoundsException;
 use Conia\Http\Exception\RuntimeException;
 use Conia\Http\Request;
 use Nyholm\Psr7\Stream;
-use Nyholm\Psr7\Uri;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
 
 /**
@@ -42,6 +41,7 @@ final class RequestTest extends TestCase
         $this->assertEquals('http://www.example.com/albums?from=1988&to=1991', (string)$request->uri());
         $this->assertEquals('www.example.com', $request->uri()->getHost());
         $this->assertEquals('http://www.example.com', $request->origin());
+        $this->assertEquals('/albums?from=1988&to=1991', $request->target());
     }
 
     public function testParam(): void
@@ -280,8 +280,8 @@ final class RequestTest extends TestCase
 
     public function testAttributes(): void
     {
-        $request = new Request($this->request());
-        $request->withAttribute('one', 1)->set('two', '2');
+        $request = new Request($this->request()->withAttribute('one', 1));
+        $request->set('two', '2');
 
         $this->assertEquals(2, count($request->attributes()));
         $this->assertEquals(1, $request->get('one'));
@@ -445,42 +445,5 @@ final class RequestTest extends TestCase
         $request->setPsr($psr);
 
         $this->assertEquals($psr, $request->psr());
-    }
-
-    public function testPsr7ServerRequestWrapperMethods(): void
-    {
-        $request = new Request($this->request());
-        $request->withMethod('PUT');
-        $request->withRequestTarget('/chuck');
-        $request->withQueryParams(['get' => 'get']);
-        $request->withParsedBody(['post' => 'post']);
-        $request->withCookieParams(['cookie' => 'cookie']);
-        $request->withUri(new Uri('http://www.newexample.com'));
-        $request->withAttribute('attribute', 'attribute');
-        $request->withUploadedFiles([
-            'myfile' => [
-                'error' => UPLOAD_ERR_OK,
-                'name' => '../malic/chuck-test-file.php',
-                'size' => 123,
-                'tmp_name' => __FILE__,
-                'type' => 'text/plain',
-            ],
-        ]);
-
-        $this->assertEquals('www.newexample.com', $request->getUri()->getHost());
-        $this->assertEquals('HTTP/1.1', $request->getServerParams()['SERVER_PROTOCOL']);
-        $this->assertEquals('PUT', $request->getMethod());
-        $this->assertEquals('/chuck', $request->getRequestTarget());
-        $this->assertEquals('get', $request->getQueryParams()['get']);
-        $this->assertEquals('post', $request->getParsedBody()['post']);
-        $this->assertEquals('cookie', $request->getCookieParams()['cookie']);
-        $this->assertEquals('attribute', $request->getAttributes()['attribute']);
-        $this->assertEquals('attribute', $request->getAttribute('attribute'));
-        $this->assertEquals(true, isset($request->getUploadedFiles()['myfile']));
-
-        $request->withoutAttribute('attribute');
-
-        $this->assertEquals(false, isset($request->getAttributes()['attribute']));
-        $this->assertEquals('default', $request->getAttribute('attribute', 'default'));
     }
 }
