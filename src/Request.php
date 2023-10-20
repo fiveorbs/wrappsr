@@ -195,7 +195,6 @@ class Request
     {
         $files = $this->psr->getUploadedFiles();
         $keys = $this->validateKeys($keys);
-        $result = [];
 
         if (count($keys) === 0) {
             return $files;
@@ -203,13 +202,13 @@ class Request
 
         // Walk into the uploaded files structure
         foreach ($keys as $key) {
-            if (array_key_exists($key, $files)) {
-                // /**
-                // * @psalm-suppress MixedAssignment, MixedArrayAccess
-                // *
-                // * Psalm does not support recursive types like:
-                // *     T = array<string, string|T>
-                // */
+            if (is_array($files) && array_key_exists($key, $files)) {
+                /**
+                * @psalm-suppress MixedAssignment
+                *
+                * Psalm does not support recursive types like:
+                *     T = array<string, string|T>
+                */
                 $files = $files[$key];
             } else {
                 throw new OutOfBoundsException('Invalid files key ' . $this->formatKeys($keys));
