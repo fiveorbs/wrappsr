@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Conia\Http\Tests;
 
+use Conia\Http\Exception\RuntimeException;
 use Conia\Http\Factory\Guzzle;
 use Conia\Http\Factory\Laminas;
 use Conia\Http\Factory\Nyholm;
-use Conia\Http\Exception\RuntimeException;
-
 use stdClass;
 
 /**
