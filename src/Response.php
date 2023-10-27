@@ -6,10 +6,12 @@ namespace Conia\Http;
 
 use Conia\Http\Exception\FileNotFoundException;
 use Conia\Http\Exception\RuntimeException;
-use Conia\Http\Factory;
 use finfo;
+use Psr\Http\Message\ResponseFactoryInterface as PsrResponseFactory;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
+use Psr\Http\Message\StreamFactoryInterface as PsrStreamFactory;
 use Psr\Http\Message\StreamInterface as PsrStream;
+use Stringable;
 use Traversable;
 
 /** @psalm-api */
@@ -17,13 +19,13 @@ class Response
 {
     public function __construct(
         protected PsrResponse $psrResponse,
-        protected readonly Factory|null $factory = null,
+        protected readonly PsrStreamFactory|null $streamFactory = null,
     ) {
     }
 
-    public static function fromFactory(Factory $factory): self
+    public static function fromFactory(PsrResponseFactory $responseFactory, PsrStreamFactory $streamFactory): self
     {
-        return new self($factory->response(), $factory);
+        return new self($responseFactory->createResponse(), $streamFactory);
     }
 
     public function unwrap(): PsrResponse
@@ -108,8 +110,8 @@ class Response
             return $this;
         }
 
-        if ($this->factory) {
-            $this->psrResponse = $this->psrResponse->withBody($this->factory->stream($body));
+        if ($this->streamFactory) {
+            $this->psrResponse = $this->psrResponse->withBody($this->streamFactory->createStream($body));
 
             return $this;
         }
@@ -151,8 +153,19 @@ class Response
             ->withAddedHeader('Content-Type', $contentType);
 
         if ($body) {
-            assert(isset($this->factory));
-            $this->psrResponse = $this->psrResponse->withBody($this->factory->stream($body));
+            assert(isset($this->streamFactory));
+
+            if ($body instanceof PsrStream) {
+                $stream = $body;
+            } elseif (is_string($body) || $body instanceof Stringable) {
+                $stream = $this->streamFactory->createStream((string)$body);
+            } elseif (is_resource($body)) {
+                $stream = $this->streamFactory->createStreamFromResource($body);
+            } else {
+                throw new RuntimeException('Only strings, Stringable or resources are allowed');
+            }
+
+            $this->psrResponse = $this->psrResponse->withBody($stream);
         }
 
         return $this;
@@ -200,8 +213,8 @@ class Response
         $contentType = $finfo->file($file);
         $finfo = new finfo(FILEINFO_MIME_ENCODING);
         $encoding = $finfo->file($file);
-        assert(isset($this->factory));
-        $stream = $this->factory->streamFromFile($file, 'rb');
+        assert(isset($this->streamFactory));
+        $stream = $this->streamFactory->createStreamFromFile($file, 'rb');
 
         $this->psrResponse = $this->psrResponse
             ->withStatus($code, $reasonPhrase)
