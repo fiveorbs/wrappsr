@@ -4,30 +4,33 @@ declare(strict_types=1);
 
 namespace Conia\Http\Tests;
 
-use Conia\Http\Factory\Guzzle;
 use Conia\Http\Middleware;
 use Conia\Http\Request;
 use Conia\Http\Response;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-/**
- * @internal
- *
- * @covers \Conia\Http\Middleware
- */
 final class MiddlewareTest extends TestCase
 {
     public function testMiddleware(): void
     {
-        $request = (new Guzzle())->request();
+        $factory = new Psr17Factory();
+        $creator = new ServerRequestCreator(
+            $factory, // ServerRequestFactory
+            $factory, // UriFactory
+            $factory, // UploadedFileFactory
+            $factory  // StreamFactory
+        );
+        $request = $creator->fromGlobals();
         $rh = new class () implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
-                $factory = new Guzzle();
+                $factory = new Psr17Factory();
 
-                return $factory->response()->withBody($factory->stream('test:' . $request->getAttribute('test')));
+                return $factory->createResponse()->withBody($factory->createStream('test:' . $request->getAttribute('test')));
             }
         };
         $mw = new class () extends Middleware {

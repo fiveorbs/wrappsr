@@ -10,11 +10,6 @@ use Conia\Http\Request;
 use Nyholm\Psr7\Stream;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
 
-/**
- * @internal
- *
- * @covers \Conia\Http\Request
- */
 final class RequestTest extends TestCase
 {
     public function testHelperMethods(): void

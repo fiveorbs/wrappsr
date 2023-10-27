@@ -8,14 +8,12 @@ use Conia\Http\Factory;
 use Conia\Http\Factory\Nyholm;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase as BaseTestCase;
+use Psr\Http\Message\RequestFactoryInterface as PsrRequestFactory;
+use Psr\Http\Message\ResponseFactoryInterface as PsrResponseFactory;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
+use Psr\Http\Message\StreamFactoryInterface as PsrStreamFactory;
 
-/**
- * @internal
- *
- * @coversNothing
- */
 class TestCase extends BaseTestCase
 {
     public function throws(string $exception, string $message = null): void
@@ -27,9 +25,19 @@ class TestCase extends BaseTestCase
         }
     }
 
-    public function factory(): Factory
+    public function responseFactory(): PsrResponseFactory
     {
-        return new Nyholm();
+        return new Psr17Factory();
+    }
+
+    public function requestFactory(): PsrRequestFactory
+    {
+        return new Psr17Factory();
+    }
+
+    public function streamFactory(): PsrStreamFactory
+    {
+        return new Psr17Factory();
     }
 
     public function response(): PsrResponse
