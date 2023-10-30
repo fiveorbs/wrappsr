@@ -69,22 +69,38 @@ final class ResponseTest extends TestCase
         $this->assertEquals($text, (string)$response->getBody());
     }
 
-    public function testSetBody(): void
+    public function testSetBodyWithStream(): void
     {
-        $stream = $this->streamFactory()->createStream('Chuck text');
+        $stream = $this->streamFactory()->createStream('Chuck text stream');
         $response = new Response($this->response());
         $response->body($stream);
-        $this->assertEquals('Chuck text', (string)$response->getBody());
+        $this->assertEquals('Chuck text stream', (string)$response->getBody());
     }
 
-    public function testFailSettingBodyWithoutFactory(): void
+    public function testSetBodyWithString(): void
     {
-        $this->throws(RuntimeException::class, 'No factory');
-
-        $fh = fopen('php://temp', 'r+');
-        fwrite($fh, 'Chuck resource');
         $response = new Response($this->response());
-        $response->body('fails');
+        $response->body('Chuck text string');
+        $this->assertEquals('Chuck text string', (string)$response->getBody());
+    }
+
+    public function testSetBodyWithStringUsingFactory(): void
+    {
+        $stream = $this->streamFactory()->createStream('Chuck text using factory');
+        $response = new Response($this->response(), $this->streamFactory());
+        $response->body($stream);
+        $this->assertEquals('Chuck text using factory', (string)$response->getBody());
+    }
+
+    public function testFailSettingStringBodyWithoutFactory(): void
+    {
+        $this->throws(RuntimeException::class, 'not writable');
+
+        $fh = fopen('php://temp', 'r');
+        $stream = $this->streamFactory()->createStreamFromResource($fh);
+        $response = new Response($this->response());
+        $response->body($stream);
+        $response->body('try to overwrite');
     }
 
     public function testInitWithHeader(): void

@@ -116,7 +116,16 @@ class Response
             return $this;
         }
 
-        throw new RuntimeException('No factory instance set in response object');
+        $stream = $this->psrResponse->getBody();
+
+        if ($stream->isWritable()) {
+            $stream->rewind();
+            $stream->write($body);
+
+            return $this;
+        }
+
+        throw new RuntimeException('The response body is not writable!');
     }
 
     public function getBody(): PsrStream
