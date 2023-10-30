@@ -227,7 +227,10 @@ final class ResponseTest extends TestCase
     public function testFileDownloadResponseWithChangedName(): void
     {
         $file = self::FIXTURES . '/image.webp';
-        $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->download($file, 'newname.jpg');
+        $response = Response::fromFactory(
+            $this->responseFactory(),
+            $this->streamFactory()
+        )->download($file, 'newname.jpg');
 
         $this->assertEquals('image/webp', $response->getHeader('Content-Type')[0]);
         $this->assertEquals((string)filesize($file), $response->getHeader('Content-Length')[0]);

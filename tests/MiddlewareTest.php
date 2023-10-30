@@ -30,7 +30,9 @@ final class MiddlewareTest extends TestCase
             {
                 $factory = new Psr17Factory();
 
-                return $factory->createResponse()->withBody($factory->createStream('test:' . $request->getAttribute('test')));
+                return $factory->createResponse()->withBody(
+                    $factory->createStream('test:' . $request->getAttribute('test'))
+                );
             }
         };
         $mw = new class () extends Middleware {

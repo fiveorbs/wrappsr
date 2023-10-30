@@ -139,9 +139,6 @@ class Response
         return $this;
     }
 
-    /**
-     * @param null|PsrStream|resource|string $body
-     */
     public function withContentType(
         string $contentType,
         mixed $body = null,

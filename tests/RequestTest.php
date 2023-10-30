@@ -14,6 +14,7 @@ final class RequestTest extends TestCase
 {
     public function testHelperMethods(): void
     {
+        error_log('hansemann seins');
         $request = new Request($this->request());
 
         $this->assertEquals('GET', $request->method());
