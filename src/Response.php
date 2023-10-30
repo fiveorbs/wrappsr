@@ -102,14 +102,25 @@ class Response
         return $this->psrResponse->hasHeader($name);
     }
 
-    public function body(PsrStream|string $body): static
+    public function body(mixed $body): static
     {
         if ($body instanceof PsrStream) {
-            $this->psrResponse = $this->psrResponse->withBody($body);
-
-            return $this;
+            return $this->setStreamBody($body);
         }
 
+        if (is_string($body) || $body instanceof Stringable) {
+            return $this->setStringBody((string)$body);
+        }
+
+        if (is_resource($body)) {
+            return $this->setResourceBody($body);
+        }
+
+        throw new RuntimeException('Only strings, Stringable or resources are allowed to create streams!');
+    }
+
+    protected function setStringBody(string $body): static
+    {
         if ($this->streamFactory) {
             $this->psrResponse = $this->psrResponse->withBody($this->streamFactory->createStream($body));
 
@@ -126,6 +137,27 @@ class Response
         }
 
         throw new RuntimeException('The response body is not writable!');
+    }
+
+    protected function setStreamBody(PsrStream $body): static
+    {
+        $this->psrResponse = $this->psrResponse->withBody($body);
+
+        return $this;
+    }
+
+    /**
+     * @param resource $body
+     */
+    protected function setResourceBody(mixed $body): static
+    {
+        if ($this->streamFactory) {
+            $this->psrResponse = $this->psrResponse->withBody($this->streamFactory->createStreamFromResource($body));
+
+            return $this;
+        }
+
+        throw new RuntimeException('No factory available to create stream from resource!');
     }
 
     public function getBody(): PsrStream
@@ -159,19 +191,7 @@ class Response
             ->withAddedHeader('Content-Type', $contentType);
 
         if ($body) {
-            assert(isset($this->streamFactory));
-
-            if ($body instanceof PsrStream) {
-                $stream = $body;
-            } elseif (is_string($body) || $body instanceof Stringable) {
-                $stream = $this->streamFactory->createStream((string)$body);
-            } elseif (is_resource($body)) {
-                $stream = $this->streamFactory->createStreamFromResource($body);
-            } else {
-                throw new RuntimeException('Only strings, Stringable or resources are allowed');
-            }
-
-            $this->psrResponse = $this->psrResponse->withBody($stream);
+            $this->body($body);
         }
 
         return $this;

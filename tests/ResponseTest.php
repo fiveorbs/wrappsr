@@ -86,9 +86,8 @@ final class ResponseTest extends TestCase
 
     public function testSetBodyWithStringUsingFactory(): void
     {
-        $stream = $this->streamFactory()->createStream('Chuck text using factory');
         $response = new Response($this->response(), $this->streamFactory());
-        $response->body($stream);
+        $response->body('Chuck text using factory');
         $this->assertEquals('Chuck text using factory', (string)$response->getBody());
     }
 
@@ -152,6 +151,72 @@ final class ResponseTest extends TestCase
         $this->assertEquals('/chuck', $response->getHeader('Location')[0]);
     }
 
+    public function testWithContentTypeFromResource(): void
+    {
+        $fh = fopen('php://temp', 'r+');
+        fwrite($fh, '<h1>Chuck resource</h1>');
+        $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())
+            ->withContentType('text/html', $fh, 404, 'The Phrase');
+
+        $this->assertEquals('<h1>Chuck resource</h1>', (string)$response->getBody());
+        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+    }
+
+    public function testWithContentTypeFromString(): void
+    {
+        $response = (new Response($this->response()))->withContentType(
+            'text/html',
+            '<h1>Chuck String</h1>',
+            404,
+            'The Phrase'
+        );
+
+        $this->assertEquals('<h1>Chuck String</h1>', (string)$response->getBody());
+        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+    }
+
+    public function testWithContentTypeFromStream(): void
+    {
+        $stream = $this->streamFactory()->createStream('<h1>Chuck Stream</h1>');
+        $response = (new Response($this->response()))->withContentType('text/html', $stream, 404, 'The Phrase');
+
+        $this->assertEquals('<h1>Chuck Stream</h1>', (string)$response->getBody());
+        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+    }
+
+    public function testWithContentTypeFromStringable(): void
+    {
+        $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->withContentType(
+            'text/html',
+            new class () {
+                public function __toString(): string
+                {
+                    return '<h1>Chuck Stringable</h1>';
+                }
+            },
+            404,
+            'The Phrase'
+        );
+
+        $this->assertEquals('<h1>Chuck Stringable</h1>', (string)$response->getBody());
+        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+    }
+
+    public function testFailingWithContentTypeFromResource(): void
+    {
+        $this->throws(RuntimeException::class, 'No factory available');
+
+        $fh = fopen('php://temp', 'r+');
+        (new Response($this->response()))->withContentType('text/html', $fh, 404, 'The Phrase');
+    }
+
+    public function testWithContentTypeInvalidData(): void
+    {
+        $this->throws(RuntimeException::class, 'strings, Stringable or resources');
+
+        Response::fromFactory($this->responseFactory(), $this->streamFactory())->html(new stdClass());
+    }
+
     public function testHtmlResponse(): void
     {
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory());
@@ -159,36 +224,6 @@ final class ResponseTest extends TestCase
 
         $this->assertEquals('<h1>Chuck string</h1>', (string)$response->getBody());
         $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
-    }
-
-    public function testHtmlResponseFromResource(): void
-    {
-        $fh = fopen('php://temp', 'r+');
-        fwrite($fh, '<h1>Chuck resource</h1>');
-        $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->html($fh);
-
-        $this->assertEquals('<h1>Chuck resource</h1>', (string)$response->getBody());
-        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
-    }
-
-    public function testHtmlResponseFromStringable(): void
-    {
-        $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->html(new class () {
-            public function __toString(): string
-            {
-                return '<h1>Chuck Stringable</h1>';
-            }
-        });
-
-        $this->assertEquals('<h1>Chuck Stringable</h1>', (string)$response->getBody());
-        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
-    }
-
-    public function testHtmlResponseInvalidData(): void
-    {
-        $this->throws(RuntimeException::class, 'strings, Stringable or resources');
-
-        Response::fromFactory($this->responseFactory(), $this->streamFactory())->html(new stdClass());
     }
 
     public function testTextResponse(): void
