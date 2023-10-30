@@ -75,6 +75,14 @@ final class RequestTest extends TestCase
         $this->assertEquals('deflate, gzip;q=1.0, *;q=0.5', $request->headers()['Accept-Encoding'][0]);
     }
 
+    public function testHasHeader(): void
+    {
+        $request = new Request($this->request());
+
+        $this->assertEquals(true, $request->hasHeader('Host'));
+        $this->assertEquals(false, $request->hasHeader('Does-Not-Exist'));
+    }
+
     public function testHeadersFirstEntryOnly(): void
     {
         $request = new Request($this->request());
