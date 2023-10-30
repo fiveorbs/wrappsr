@@ -7,7 +7,7 @@ Conia PSR Wrappers
 [![Psalm level](https://shepherd.dev/github/coniadev/wrappsr/level.svg?)](https://conia.dev/wrappsr)
 [![Quality Score](https://img.shields.io/scrutinizer/g/coniadev/wrappsr.svg)](https://scrutinizer-ci.com/g/coniadev/wrappsr)
 
-Convenience wrappers for PSR-7/PSR-17 implementations.
+Convenience wrappers for PSR-7/PSR-15 libraries.
 
 ## License
 
