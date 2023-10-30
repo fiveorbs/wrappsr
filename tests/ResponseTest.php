@@ -93,6 +93,9 @@ final class ResponseTest extends TestCase
         $response->header('header-value', 'value');
 
         $this->assertEquals(true, $response->hasHeader('Header-Value'));
+
+        $headers = $response->headers();
+        $this->assertEquals('value', $headers['header-value'][0]);
     }
 
     public function testGetHeader(): void
