@@ -52,6 +52,6 @@ final class MiddlewareTest extends TestCase
         };
         $response = $mw->process($request, $rh);
 
-        $this->assertEquals('test:value:after', (string)$response->getBody());
+        $this->assertSame('test:value:after', (string)$response->getBody());
     }
 }

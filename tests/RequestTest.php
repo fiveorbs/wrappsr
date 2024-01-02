@@ -17,27 +17,27 @@ final class RequestTest extends TestCase
         error_log('hansemann seins');
         $request = new Request($this->request());
 
-        $this->assertEquals('GET', $request->method());
-        $this->assertEquals(true, $request->isMethod('GET'));
-        $this->assertEquals(false, $request->isMethod('POST'));
+        $this->assertSame('GET', $request->method());
+        $this->assertSame(true, $request->isMethod('GET'));
+        $this->assertSame(false, $request->isMethod('POST'));
     }
 
     public function testUriHelpers(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('/albums', $request->uri()->getPath());
-        $this->assertEquals('http://www.example.com/albums', (string)$request->uri());
+        $this->assertSame('/albums', $request->uri()->getPath());
+        $this->assertSame('http://www.example.com/albums', (string)$request->uri());
 
         $request = new Request($this->request(server: [
             'QUERY_STRING' => 'from=1988&to=1991',
             'REQUEST_URI' => '/albums?from=1988&to=1991',
         ]));
 
-        $this->assertEquals('http://www.example.com/albums?from=1988&to=1991', (string)$request->uri());
-        $this->assertEquals('www.example.com', $request->uri()->getHost());
-        $this->assertEquals('http://www.example.com', $request->origin());
-        $this->assertEquals('/albums?from=1988&to=1991', $request->target());
+        $this->assertSame('http://www.example.com/albums?from=1988&to=1991', (string)$request->uri());
+        $this->assertSame('www.example.com', $request->uri()->getHost());
+        $this->assertSame('http://www.example.com', $request->origin());
+        $this->assertSame('/albums?from=1988&to=1991', $request->target());
     }
 
     public function testParam(): void
@@ -47,48 +47,48 @@ final class RequestTest extends TestCase
             'born' => '1967',
         ]));
 
-        $this->assertEquals('schuldiner', $request->param('chuck'));
-        $this->assertEquals('1967', $request->param('born'));
+        $this->assertSame('schuldiner', $request->param('chuck'));
+        $this->assertSame('1967', $request->param('born'));
     }
 
     public function testHeader(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('deflate, gzip;q=1.0, *;q=0.5', $request->header('Accept-Encoding'));
-        $this->assertEquals('', $request->header('Does-Not-Exist'));
+        $this->assertSame('deflate, gzip;q=1.0, *;q=0.5', $request->header('Accept-Encoding'));
+        $this->assertSame('', $request->header('Does-Not-Exist'));
     }
 
     public function testHeaderArray(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals(['deflate, gzip;q=1.0, *;q=0.5'], $request->headerArray('Accept-Encoding'));
-        $this->assertEquals([], $request->headerArray('Does-Not-Exist'));
+        $this->assertSame(['deflate, gzip;q=1.0, *;q=0.5'], $request->headerArray('Accept-Encoding'));
+        $this->assertSame([], $request->headerArray('Does-Not-Exist'));
     }
 
     public function testHeaders(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('www.example.com', $request->headers()['Host'][0]);
-        $this->assertEquals('deflate, gzip;q=1.0, *;q=0.5', $request->headers()['Accept-Encoding'][0]);
+        $this->assertSame('www.example.com', $request->headers()['Host'][0]);
+        $this->assertSame('deflate, gzip;q=1.0, *;q=0.5', $request->headers()['Accept-Encoding'][0]);
     }
 
     public function testHasHeader(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals(true, $request->hasHeader('Host'));
-        $this->assertEquals(false, $request->hasHeader('Does-Not-Exist'));
+        $this->assertSame(true, $request->hasHeader('Host'));
+        $this->assertSame(false, $request->hasHeader('Does-Not-Exist'));
     }
 
     public function testHeadersFirstEntryOnly(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('www.example.com', $request->headers(firstOnly: true)['Host']);
-        $this->assertEquals('deflate, gzip;q=1.0, *;q=0.5', $request->headers(firstOnly: true)['Accept-Encoding']);
+        $this->assertSame('www.example.com', $request->headers(firstOnly: true)['Host']);
+        $this->assertSame('deflate, gzip;q=1.0, *;q=0.5', $request->headers(firstOnly: true)['Accept-Encoding']);
     }
 
     public function testWritingHeaders(): void
@@ -98,19 +98,19 @@ final class RequestTest extends TestCase
         $request->setHeader('test-header', 'test-value-replaced');
         $request->addHeader('test-header', 'test-value-added');
 
-        $this->assertEquals('test-value-replaced, test-value-added', $request->header('test-header'));
-        $this->assertEquals(['test-value-replaced', 'test-value-added'], $request->headerArray('test-header'));
+        $this->assertSame('test-value-replaced, test-value-added', $request->header('test-header'));
+        $this->assertSame(['test-value-replaced', 'test-value-added'], $request->headerArray('test-header'));
 
         $request->removeHeader('test-header');
 
-        $this->assertEquals('', $request->header('test-header'));
+        $this->assertSame('', $request->header('test-header'));
     }
 
     public function testParamDefault(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('the default', $request->param('doesnotexist', 'the default'));
+        $this->assertSame('the default', $request->param('doesnotexist', 'the default'));
     }
 
     public function testParamFailing(): void
@@ -119,7 +119,7 @@ final class RequestTest extends TestCase
 
         $request = new Request($this->request());
 
-        $this->assertEquals(null, $request->param('doesnotexist'));
+        $this->assertSame(null, $request->param('doesnotexist'));
     }
 
     public function testParams(): void
@@ -129,9 +129,9 @@ final class RequestTest extends TestCase
         ));
         $params = $request->params();
 
-        $this->assertEquals(2, count($params));
-        $this->assertEquals('1967', $params['born']);
-        $this->assertEquals('schuldiner', $params['chuck']);
+        $this->assertSame(2, count($params));
+        $this->assertSame('1967', $params['born']);
+        $this->assertSame('schuldiner', $params['chuck']);
     }
 
     public function testField(): void
@@ -144,15 +144,15 @@ final class RequestTest extends TestCase
             post: ['chuck' => 'schuldiner', 'born' => '1967']
         ));
 
-        $this->assertEquals('schuldiner', $request->field('chuck'));
-        $this->assertEquals('1967', $request->field('born'));
+        $this->assertSame('schuldiner', $request->field('chuck'));
+        $this->assertSame('1967', $request->field('born'));
     }
 
     public function testFieldDefaultPostIsNull(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('the default', $request->field('doesnotexist', 'the default'));
+        $this->assertSame('the default', $request->field('doesnotexist', 'the default'));
     }
 
     public function testFieldDefaultPostIsArray(): void
@@ -165,7 +165,7 @@ final class RequestTest extends TestCase
             post: ['chuck' => 'schuldiner']
         ));
 
-        $this->assertEquals('the default', $request->field('doesnotexist', 'the default'));
+        $this->assertSame('the default', $request->field('doesnotexist', 'the default'));
     }
 
     public function testFieldFailing(): void
@@ -193,7 +193,7 @@ final class RequestTest extends TestCase
             ]
         ));
 
-        $this->assertEquals([ 'first_band' => 'Mantas', 'chuck' => 'schuldiner', ], $request->form());
+        $this->assertSame([ 'first_band' => 'Mantas', 'chuck' => 'schuldiner', ], $request->form());
     }
 
     public function testCookie(): void
@@ -203,15 +203,15 @@ final class RequestTest extends TestCase
             'born' => '1967',
         ]));
 
-        $this->assertEquals('schuldiner', $request->cookie('chuck'));
-        $this->assertEquals('1967', $request->cookie('born'));
+        $this->assertSame('schuldiner', $request->cookie('chuck'));
+        $this->assertSame('1967', $request->cookie('born'));
     }
 
     public function testCookieDefault(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('the default', $request->cookie('doesnotexist', 'the default'));
+        $this->assertSame('the default', $request->cookie('doesnotexist', 'the default'));
     }
 
     public function testCookieFailing(): void
@@ -228,24 +228,24 @@ final class RequestTest extends TestCase
         $request = new Request($this->request(cookie: ['chuck' => 'schuldiner', 'born' => '1967']));
         $cookies = $request->cookies();
 
-        $this->assertEquals(2, count($cookies));
-        $this->assertEquals('1967', $cookies['born']);
-        $this->assertEquals('schuldiner', $cookies['chuck']);
+        $this->assertSame(2, count($cookies));
+        $this->assertSame('1967', $cookies['born']);
+        $this->assertSame('schuldiner', $cookies['chuck']);
     }
 
     public function testServer(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('www.example.com', $request->server('HTTP_HOST'));
-        $this->assertEquals('HTTP/1.1', $request->server('SERVER_PROTOCOL'));
+        $this->assertSame('www.example.com', $request->server('HTTP_HOST'));
+        $this->assertSame('HTTP/1.1', $request->server('SERVER_PROTOCOL'));
     }
 
     public function testServerDefault(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('the default', $request->server('doesnotexist', 'the default'));
+        $this->assertSame('the default', $request->server('doesnotexist', 'the default'));
     }
 
     public function testServerFailing(): void
@@ -254,7 +254,7 @@ final class RequestTest extends TestCase
 
         $request = new Request($this->request());
 
-        $this->assertEquals(null, $request->server('doesnotexist'));
+        $this->assertSame(null, $request->server('doesnotexist'));
     }
 
     public function testServerParams(): void
@@ -262,15 +262,15 @@ final class RequestTest extends TestCase
         $request = new Request($this->request());
         $params = $request->serverParams();
 
-        $this->assertEquals('www.example.com', $params['HTTP_HOST']);
-        $this->assertEquals('HTTP/1.1', $params['SERVER_PROTOCOL']);
+        $this->assertSame('www.example.com', $params['HTTP_HOST']);
+        $this->assertSame('HTTP/1.1', $params['SERVER_PROTOCOL']);
     }
 
     public function testGetDefault(): void
     {
         $request = new Request($this->request());
 
-        $this->assertEquals('the default', $request->get('doesnotexist', 'the default'));
+        $this->assertSame('the default', $request->get('doesnotexist', 'the default'));
     }
 
     public function testGetFailing(): void
@@ -279,7 +279,7 @@ final class RequestTest extends TestCase
 
         $request = new Request($this->request());
 
-        $this->assertEquals(null, $request->get('doesnotexist'));
+        $this->assertSame(null, $request->get('doesnotexist'));
     }
 
     public function testAttributes(): void
@@ -287,14 +287,14 @@ final class RequestTest extends TestCase
         $request = new Request($this->request()->withAttribute('one', 1));
         $request->set('two', '2');
 
-        $this->assertEquals(2, count($request->attributes()));
-        $this->assertEquals(1, $request->get('one'));
-        $this->assertEquals('2', $request->get('two'));
+        $this->assertSame(2, count($request->attributes()));
+        $this->assertSame(1, $request->get('one'));
+        $this->assertSame('2', $request->get('two'));
     }
 
     public function testBody(): void
     {
-        $this->assertEquals('', (string)(new Request($this->request()))->body());
+        $this->assertSame('', (string)(new Request($this->request()))->body());
     }
 
     public function testJson(): void
@@ -302,7 +302,7 @@ final class RequestTest extends TestCase
         $stream = Stream::create('[{"title": "Leprosy", "released": 1988}, {"title": "Human", "released": 1991}]');
         $request = new Request($this->request()->withBody($stream));
 
-        $this->assertEquals([ ['title' => 'Leprosy', 'released' => 1988],
+        $this->assertSame([ ['title' => 'Leprosy', 'released' => 1988],
             ['title' => 'Human', 'released' => 1991], ], $request->json());
     }
 
@@ -310,7 +310,7 @@ final class RequestTest extends TestCase
     {
         $request = new Request($this->request());
 
-        $this->assertEquals(null, $request->json());
+        $this->assertSame(null, $request->json());
     }
 
     public function testGetFileInstance(): void
@@ -342,9 +342,9 @@ final class RequestTest extends TestCase
         $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files();
 
-        $this->assertEquals(2, count($files));
-        $this->assertEquals(true, isset($files['myfile']));
-        $this->assertEquals(true, isset($files['nested']));
+        $this->assertSame(2, count($files));
+        $this->assertSame(true, isset($files['myfile']));
+        $this->assertSame(true, isset($files['nested']));
     }
 
     public function testGetFilesInstances(): void
@@ -352,7 +352,7 @@ final class RequestTest extends TestCase
         $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files('myfile');
 
-        $this->assertEquals(2, count($files));
+        $this->assertSame(2, count($files));
         $this->assertInstanceOf(PsrUploadedFile::class, $files[0]);
         $this->assertInstanceOf(PsrUploadedFile::class, $files[1]);
     }
@@ -362,7 +362,7 @@ final class RequestTest extends TestCase
         $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files('nested', 'myfile');
 
-        $this->assertEquals(2, count($files));
+        $this->assertSame(2, count($files));
         $this->assertInstanceOf(PsrUploadedFile::class, $files[0]);
         $this->assertInstanceOf(PsrUploadedFile::class, $files[1]);
     }
@@ -372,7 +372,7 @@ final class RequestTest extends TestCase
         $request = new Request($this->request(files: $this->getFiles()));
         $files = $request->files(['nested', 'myfile']);
 
-        $this->assertEquals(2, count($files));
+        $this->assertSame(2, count($files));
         $this->assertInstanceOf(PsrUploadedFile::class, $files[0]);
         $this->assertInstanceOf(PsrUploadedFile::class, $files[1]);
     }
@@ -382,7 +382,7 @@ final class RequestTest extends TestCase
         $request = new Request($this->request());
         $files = $request->files('myfile');
 
-        $this->assertEquals(1, count($files));
+        $this->assertSame(1, count($files));
         $this->assertInstanceOf(PsrUploadedFile::class, $files[0]);
     }
 
@@ -448,6 +448,6 @@ final class RequestTest extends TestCase
         $request = new Request($this->request());
         $request->wrap($psr);
 
-        $this->assertEquals($psr, $request->unwrap());
+        $this->assertSame($psr, $request->unwrap());
     }
 }

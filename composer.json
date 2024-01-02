@@ -1,49 +1,49 @@
 {
-  "name": "conia/wrappsr",
-  "description": "Convenience wrappers for PSR-7/PSR-15/PSR-17",
-  "keywords": [
-    "psr-7",
-    "psr7",
-    "psr-15",
-    "psr15",
-    "psr-17",
-    "psr17",
-    "request",
-    "response",
-    "http"
-  ],
-  "type": "library",
-  "license": "MIT",
-  "prefer-stable": true,
-  "require": {
-    "php": ">=8.2",
-    "psr/http-factory": "^1.0",
-    "psr/http-message": "^1.0",
-    "psr/http-message-implementation": "^1.0",
-    "psr/http-server-handler": "^1.0",
-    "psr/http-server-middleware": "^1.0"
-  },
-  "require-dev": {
-    "conia/development": "^1.0.2",
-    "dealerdirect/phpcodesniffer-composer-installer": "^1",
-    "nyholm/psr7": "^1.8",
-    "nyholm/psr7-server": "^1",
-    "phpunit/phpunit": "^10",
-    "vimeo/psalm": "^5.7"
-  },
-  "autoload": {
-    "psr-4": {
-      "Conia\\Http\\": "src"
+    "name": "conia/wrappsr",
+    "description": "Convenience wrappers for PSR-7/PSR-15/PSR-17",
+    "keywords": [
+        "psr-7",
+        "psr7",
+        "psr-15",
+        "psr15",
+        "psr-17",
+        "psr17",
+        "request",
+        "response",
+        "http"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.2",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.0",
+        "psr/http-message-implementation": "^1.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0"
+    },
+    "require-dev": {
+        "conia/development": "^1.0.2",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1",
+        "nyholm/psr7": "^1.8",
+        "nyholm/psr7-server": "^1",
+        "phpunit/phpunit": "^10",
+        "vimeo/psalm": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Conia\\Http\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Conia\\Http\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Conia\\Http\\Tests\\": "tests"
-    }
-  },
-  "config": {
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
-    }
-  }
 }

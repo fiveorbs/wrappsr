@@ -18,7 +18,7 @@ final class ResponseTest extends TestCase
         $psr = $this->response();
         $response = new Response($psr);
 
-        $this->assertEquals($psr, $response->unwrap());
+        $this->assertSame($psr, $response->unwrap());
 
         $response->wrap($this->response());
 
@@ -29,8 +29,8 @@ final class ResponseTest extends TestCase
     {
         $response = new Response($this->response());
 
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('OK', $response->getReasonPhrase());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('OK', $response->getReasonPhrase());
     }
 
     public function testSetStatusCode(): void
@@ -38,8 +38,8 @@ final class ResponseTest extends TestCase
         $response = new Response($this->response(), $this->streamFactory());
         $response->status(404);
 
-        $this->assertEquals(404, $response->getStatusCode());
-        $this->assertEquals('Not Found', $response->getReasonPhrase());
+        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame('Not Found', $response->getReasonPhrase());
     }
 
     public function testSetStatusCodeAndReasonPhrase(): void
@@ -47,26 +47,26 @@ final class ResponseTest extends TestCase
         $response = new Response($this->response(), $this->streamFactory());
         $response->status(404, 'Nothing to see');
 
-        $this->assertEquals(404, $response->getStatusCode());
-        $this->assertEquals('Nothing to see', $response->getReasonPhrase());
+        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame('Nothing to see', $response->getReasonPhrase());
     }
 
     public function testProtocolVersion(): void
     {
         $response = new Response($this->response(), $this->streamFactory());
 
-        $this->assertEquals('1.1', $response->getProtocolVersion());
+        $this->assertSame('1.1', $response->getProtocolVersion());
 
         $response->protocolVersion('2.0');
 
-        $this->assertEquals('2.0', $response->getProtocolVersion());
+        $this->assertSame('2.0', $response->getProtocolVersion());
     }
 
     public function testCreateWithStringBody(): void
     {
         $text = 'text';
         $response = (new Response($this->response(), $this->streamFactory()))->write($text);
-        $this->assertEquals($text, (string)$response->getBody());
+        $this->assertSame($text, (string)$response->getBody());
     }
 
     public function testSetBodyWithStream(): void
@@ -74,21 +74,21 @@ final class ResponseTest extends TestCase
         $stream = $this->streamFactory()->createStream('Chuck text stream');
         $response = new Response($this->response());
         $response->body($stream);
-        $this->assertEquals('Chuck text stream', (string)$response->getBody());
+        $this->assertSame('Chuck text stream', (string)$response->getBody());
     }
 
     public function testSetBodyWithString(): void
     {
         $response = new Response($this->response());
         $response->body('Chuck text string');
-        $this->assertEquals('Chuck text string', (string)$response->getBody());
+        $this->assertSame('Chuck text string', (string)$response->getBody());
     }
 
     public function testSetBodyWithStringUsingFactory(): void
     {
         $response = new Response($this->response(), $this->streamFactory());
         $response->body('Chuck text using factory');
-        $this->assertEquals('Chuck text using factory', (string)$response->getBody());
+        $this->assertSame('Chuck text using factory', (string)$response->getBody());
     }
 
     public function testFailSettingStringBodyWithoutFactory(): void
@@ -107,10 +107,10 @@ final class ResponseTest extends TestCase
         $response = new Response($this->response());
         $response->header('header-value', 'value');
 
-        $this->assertEquals(true, $response->hasHeader('Header-Value'));
+        $this->assertSame(true, $response->hasHeader('Header-Value'));
 
         $headers = $response->headers();
-        $this->assertEquals('value', $headers['header-value'][0]);
+        $this->assertSame('value', $headers['header-value'][0]);
     }
 
     public function testGetHeader(): void
@@ -118,7 +118,7 @@ final class ResponseTest extends TestCase
         $response = new Response($this->response(), $this->streamFactory());
         $response = $response->header('header-value', 'value');
 
-        $this->assertEquals('value', $response->getHeader('Header-Value')[0]);
+        $this->assertSame('value', $response->getHeader('Header-Value')[0]);
     }
 
     public function testRemoveHeader(): void
@@ -126,11 +126,11 @@ final class ResponseTest extends TestCase
         $response = new Response($this->response(), $this->streamFactory());
         $response->header('header-value', 'value');
 
-        $this->assertEquals(true, $response->hasHeader('Header-Value'));
+        $this->assertSame(true, $response->hasHeader('Header-Value'));
 
         $response = $response->removeHeader('header-value');
 
-        $this->assertEquals(false, $response->hasHeader('Header-Value'));
+        $this->assertSame(false, $response->hasHeader('Header-Value'));
     }
 
     public function testRedirectTemporary(): void
@@ -138,8 +138,8 @@ final class ResponseTest extends TestCase
         $response = new Response($this->response(), $this->streamFactory());
         $response->redirect('/chuck');
 
-        $this->assertEquals(302, $response->getStatusCode());
-        $this->assertEquals('/chuck', $response->getHeader('Location')[0]);
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame('/chuck', $response->getHeader('Location')[0]);
     }
 
     public function testRedirectPermanent(): void
@@ -147,8 +147,8 @@ final class ResponseTest extends TestCase
         $response = new Response($this->response(), $this->streamFactory());
         $response->redirect('/chuck', 301);
 
-        $this->assertEquals(301, $response->getStatusCode());
-        $this->assertEquals('/chuck', $response->getHeader('Location')[0]);
+        $this->assertSame(301, $response->getStatusCode());
+        $this->assertSame('/chuck', $response->getHeader('Location')[0]);
     }
 
     public function testWithContentTypeFromResource(): void
@@ -158,8 +158,8 @@ final class ResponseTest extends TestCase
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())
             ->withContentType('text/html', $fh, 404, 'The Phrase');
 
-        $this->assertEquals('<h1>Chuck resource</h1>', (string)$response->getBody());
-        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('<h1>Chuck resource</h1>', (string)$response->getBody());
+        $this->assertSame('text/html', $response->getHeader('Content-Type')[0]);
     }
 
     public function testWithContentTypeFromString(): void
@@ -171,8 +171,8 @@ final class ResponseTest extends TestCase
             'The Phrase'
         );
 
-        $this->assertEquals('<h1>Chuck String</h1>', (string)$response->getBody());
-        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('<h1>Chuck String</h1>', (string)$response->getBody());
+        $this->assertSame('text/html', $response->getHeader('Content-Type')[0]);
     }
 
     public function testWithContentTypeFromStream(): void
@@ -180,8 +180,8 @@ final class ResponseTest extends TestCase
         $stream = $this->streamFactory()->createStream('<h1>Chuck Stream</h1>');
         $response = (new Response($this->response()))->withContentType('text/html', $stream, 404, 'The Phrase');
 
-        $this->assertEquals('<h1>Chuck Stream</h1>', (string)$response->getBody());
-        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('<h1>Chuck Stream</h1>', (string)$response->getBody());
+        $this->assertSame('text/html', $response->getHeader('Content-Type')[0]);
     }
 
     public function testWithContentTypeFromStringable(): void
@@ -198,8 +198,8 @@ final class ResponseTest extends TestCase
             'The Phrase'
         );
 
-        $this->assertEquals('<h1>Chuck Stringable</h1>', (string)$response->getBody());
-        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('<h1>Chuck Stringable</h1>', (string)$response->getBody());
+        $this->assertSame('text/html', $response->getHeader('Content-Type')[0]);
     }
 
     public function testFailingWithContentTypeFromResource(): void
@@ -222,24 +222,24 @@ final class ResponseTest extends TestCase
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory());
         $response = $response->html('<h1>Chuck string</h1>');
 
-        $this->assertEquals('<h1>Chuck string</h1>', (string)$response->getBody());
-        $this->assertEquals('text/html', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('<h1>Chuck string</h1>', (string)$response->getBody());
+        $this->assertSame('text/html', $response->getHeader('Content-Type')[0]);
     }
 
     public function testTextResponse(): void
     {
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->text('text');
 
-        $this->assertEquals('text', (string)$response->getBody());
-        $this->assertEquals('text/plain', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('text', (string)$response->getBody());
+        $this->assertSame('text/plain', $response->getHeader('Content-Type')[0]);
     }
 
     public function testJsonResponse(): void
     {
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->json([1, 2, 3]);
 
-        $this->assertEquals('[1,2,3]', (string)$response->getBody());
-        $this->assertEquals('application/json', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('[1,2,3]', (string)$response->getBody());
+        $this->assertSame('application/json', $response->getHeader('Content-Type')[0]);
     }
 
     public function testJsonResponseTraversable(): void
@@ -255,8 +255,8 @@ final class ResponseTest extends TestCase
                 })()
             );
 
-        $this->assertEquals('[13,31,73]', (string)$response->getBody());
-        $this->assertEquals('application/json', $response->getHeader('Content-Type')[0]);
+        $this->assertSame('[13,31,73]', (string)$response->getBody());
+        $this->assertSame('application/json', $response->getHeader('Content-Type')[0]);
     }
 
     public function testFileResponse(): void
@@ -264,8 +264,8 @@ final class ResponseTest extends TestCase
         $file = self::FIXTURES . '/image.webp';
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->file($file);
 
-        $this->assertEquals('image/webp', $response->getHeader('Content-Type')[0]);
-        $this->assertEquals((string)filesize($file), $response->getHeader('Content-Length')[0]);
+        $this->assertSame('image/webp', $response->getHeader('Content-Type')[0]);
+        $this->assertSame((string)filesize($file), $response->getHeader('Content-Length')[0]);
     }
 
     public function testFileDownloadResponse(): void
@@ -273,9 +273,9 @@ final class ResponseTest extends TestCase
         $file = self::FIXTURES . '/image.webp';
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->download($file);
 
-        $this->assertEquals('image/webp', $response->getHeader('Content-Type')[0]);
-        $this->assertEquals((string)filesize($file), $response->getHeader('Content-Length')[0]);
-        $this->assertEquals('attachment; filename="image.webp"', $response->getHeader('Content-Disposition')[0]);
+        $this->assertSame('image/webp', $response->getHeader('Content-Type')[0]);
+        $this->assertSame((string)filesize($file), $response->getHeader('Content-Length')[0]);
+        $this->assertSame('attachment; filename="image.webp"', $response->getHeader('Content-Disposition')[0]);
     }
 
     public function testFileDownloadResponseWithChangedName(): void
@@ -286,9 +286,9 @@ final class ResponseTest extends TestCase
             $this->streamFactory()
         )->download($file, 'newname.jpg');
 
-        $this->assertEquals('image/webp', $response->getHeader('Content-Type')[0]);
-        $this->assertEquals((string)filesize($file), $response->getHeader('Content-Length')[0]);
-        $this->assertEquals('attachment; filename="newname.jpg"', $response->getHeader('Content-Disposition')[0]);
+        $this->assertSame('image/webp', $response->getHeader('Content-Type')[0]);
+        $this->assertSame((string)filesize($file), $response->getHeader('Content-Length')[0]);
+        $this->assertSame('attachment; filename="newname.jpg"', $response->getHeader('Content-Disposition')[0]);
     }
 
     public function testSendfileResponse(): void
@@ -298,13 +298,13 @@ final class ResponseTest extends TestCase
         $file = self::FIXTURES . '/image.webp';
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->sendfile($file);
 
-        $this->assertEquals($file, $response->getHeader('X-Accel-Redirect')[0]);
+        $this->assertSame($file, $response->getHeader('X-Accel-Redirect')[0]);
 
         $_SERVER['SERVER_SOFTWARE'] = 'apache';
 
         $response = Response::fromFactory($this->responseFactory(), $this->streamFactory())->sendfile($file);
 
-        $this->assertEquals($file, $response->getHeader('X-Sendfile')[0]);
+        $this->assertSame($file, $response->getHeader('X-Sendfile')[0]);
 
         unset($_SERVER['SERVER_SOFTWARE']);
     }
