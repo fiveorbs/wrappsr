@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace FiveOrbs\Http\Tests;
 
-use FiveOrbs\Http\Factory;
-use FiveOrbs\Http\Factory\Nyholm;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Http\Message\RequestFactoryInterface as PsrRequestFactory;
