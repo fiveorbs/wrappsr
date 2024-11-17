@@ -1,10 +1,10 @@
-site_name: Conia Http
+site_name: FiveOrbs Http
 copyright: © 2023 ebene fünf GmbH
 nav:
   - index.md
 theme:
-    name: conia
-repo_url: https://github.com/coniadev/http
+    name: fiveorbs
+repo_url: https://github.com/fiveorbs/http
 extra:
     project: Http
 plugins:
