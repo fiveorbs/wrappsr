@@ -1,5 +1,5 @@
 {
-    "name": "conia/wrappsr",
+    "name": "fiveorbs/wrappsr",
     "description": "Convenience wrappers for PSR-7/PSR-15/PSR-17",
     "keywords": [
         "psr-7",
@@ -24,7 +24,7 @@
         "psr/http-server-middleware": "^1.0"
     },
     "require-dev": {
-        "conia/development": "^1.0.2",
+        "fiveorbs/dev": "^1.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^1",
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1",
@@ -33,12 +33,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Conia\\Http\\": "src"
+            "FiveOrbs\\Http\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Conia\\Http\\Tests\\": "tests"
+            "FiveOrbs\\Http\\Tests\\": "tests"
         }
     },
     "config": {
