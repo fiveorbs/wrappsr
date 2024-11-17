@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace Conia\Http\Exception;
+namespace FiveOrbs\Http\Exception;
 
-class FileNotFoundException extends RuntimeException
-{
-}
+class FileNotFoundException extends RuntimeException {}

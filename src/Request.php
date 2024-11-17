@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Conia\Http;
+namespace FiveOrbs\Http;
 
-use Conia\Http\Exception\OutOfBoundsException;
-use Conia\Http\Exception\RuntimeException;
+use FiveOrbs\Http\Exception\OutOfBoundsException;
+use FiveOrbs\Http\Exception\RuntimeException;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
 use Psr\Http\Message\StreamInterface as PsrStream;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
@@ -14,333 +14,331 @@ use Psr\Http\Message\UriInterface as PsrUri;
 /** @psalm-api */
 class Request
 {
-    public function __construct(protected PsrServerRequest $psrRequest)
-    {
-    }
+	public function __construct(protected PsrServerRequest $psrRequest) {}
 
-    public function unwrap(): PsrServerRequest
-    {
-        return $this->psrRequest;
-    }
+	public function unwrap(): PsrServerRequest
+	{
+		return $this->psrRequest;
+	}
 
-    public function wrap(PsrServerRequest $request): static
-    {
-        $this->psrRequest = $request;
+	public function wrap(PsrServerRequest $request): static
+	{
+		$this->psrRequest = $request;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function params(): array
-    {
-        return $this->psrRequest->getQueryParams();
-    }
+	public function params(): array
+	{
+		return $this->psrRequest->getQueryParams();
+	}
 
-    public function param(string $key, mixed $default = null): mixed
-    {
-        $params = $this->psrRequest->getQueryParams();
-        $error = 'Query string variable not found';
+	public function param(string $key, mixed $default = null): mixed
+	{
+		$params = $this->psrRequest->getQueryParams();
+		$error = 'Query string variable not found';
 
-        return $this->returnOrFail($params, $key, $default, $error, func_num_args());
-    }
+		return $this->returnOrFail($params, $key, $default, $error, func_num_args());
+	}
 
-    public function form(): ?array
-    {
-        $body = $this->psrRequest->getParsedBody();
-        assert(is_null($body) || is_array($body));
+	public function form(): ?array
+	{
+		$body = $this->psrRequest->getParsedBody();
+		assert(is_null($body) || is_array($body));
 
-        return $body;
-    }
+		return $body;
+	}
 
-    public function field(string $key, mixed $default = null): mixed
-    {
-        $body = $this->psrRequest->getParsedBody();
-        assert(is_null($body) || is_array($body));
-        $error = 'Form field not found';
+	public function field(string $key, mixed $default = null): mixed
+	{
+		$body = $this->psrRequest->getParsedBody();
+		assert(is_null($body) || is_array($body));
+		$error = 'Form field not found';
 
-        return $this->returnOrFail($body, $key, $default, $error, func_num_args());
-    }
+		return $this->returnOrFail($body, $key, $default, $error, func_num_args());
+	}
 
-    public function cookies(): array
-    {
-        return $this->psrRequest->getCookieParams();
-    }
+	public function cookies(): array
+	{
+		return $this->psrRequest->getCookieParams();
+	}
 
-    public function cookie(string $key, mixed $default = null): mixed
-    {
-        $params = $this->psrRequest->getCookieParams();
-        $error = 'Cookie not found';
+	public function cookie(string $key, mixed $default = null): mixed
+	{
+		$params = $this->psrRequest->getCookieParams();
+		$error = 'Cookie not found';
 
-        return $this->returnOrFail($params, $key, $default, $error, func_num_args());
-    }
+		return $this->returnOrFail($params, $key, $default, $error, func_num_args());
+	}
 
-    public function serverParams(): array
-    {
-        return $this->psrRequest->getServerParams();
-    }
+	public function serverParams(): array
+	{
+		return $this->psrRequest->getServerParams();
+	}
 
-    public function server(string $key, mixed $default = null): mixed
-    {
-        $params = $this->psrRequest->getServerParams();
-        $error = 'Server parameter not found';
+	public function server(string $key, mixed $default = null): mixed
+	{
+		$params = $this->psrRequest->getServerParams();
+		$error = 'Server parameter not found';
 
-        return $this->returnOrFail($params, $key, $default, $error, func_num_args());
-    }
+		return $this->returnOrFail($params, $key, $default, $error, func_num_args());
+	}
 
-    public function header(string $name): string
-    {
-        return $this->psrRequest->getHeaderLine($name);
-    }
+	public function header(string $name): string
+	{
+		return $this->psrRequest->getHeaderLine($name);
+	}
 
-    public function headerArray(string $header): array
-    {
-        return $this->psrRequest->getHeader($header);
-    }
+	public function headerArray(string $header): array
+	{
+		return $this->psrRequest->getHeader($header);
+	}
 
-    public function headers(bool $firstOnly = false): array
-    {
-        $headers = $this->psrRequest->getHeaders();
+	public function headers(bool $firstOnly = false): array
+	{
+		$headers = $this->psrRequest->getHeaders();
 
-        if ($firstOnly) {
-            return array_combine(
-                array_keys($headers),
-                array_map(fn (array $v): string => $v[0], $headers),
-            );
-        }
+		if ($firstOnly) {
+			return array_combine(
+				array_keys($headers),
+				array_map(fn(array $v): string => $v[0], $headers),
+			);
+		}
 
-        return $headers;
-    }
+		return $headers;
+	}
 
-    public function setHeader(string $header, string $value): static
-    {
-        $this->psrRequest = $this->psrRequest->withHeader($header, $value);
+	public function setHeader(string $header, string $value): static
+	{
+		$this->psrRequest = $this->psrRequest->withHeader($header, $value);
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function addHeader(string $header, string $value): static
-    {
-        $this->psrRequest = $this->psrRequest->withAddedHeader($header, $value);
+	public function addHeader(string $header, string $value): static
+	{
+		$this->psrRequest = $this->psrRequest->withAddedHeader($header, $value);
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function removeHeader(string $header): static
-    {
-        $this->psrRequest = $this->psrRequest->withoutHeader($header);
+	public function removeHeader(string $header): static
+	{
+		$this->psrRequest = $this->psrRequest->withoutHeader($header);
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function hasHeader(string $header): bool
-    {
-        return $this->psrRequest->hasHeader($header);
-    }
+	public function hasHeader(string $header): bool
+	{
+		return $this->psrRequest->hasHeader($header);
+	}
 
-    public function attributes(): array
-    {
-        return $this->psrRequest->getAttributes();
-    }
+	public function attributes(): array
+	{
+		return $this->psrRequest->getAttributes();
+	}
 
-    public function set(string $attribute, mixed $value): static
-    {
-        $this->psrRequest = $this->psrRequest->withAttribute($attribute, $value);
+	public function set(string $attribute, mixed $value): static
+	{
+		$this->psrRequest = $this->psrRequest->withAttribute($attribute, $value);
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function get(string $key, mixed $default = null): mixed
-    {
-        $params = $this->psrRequest->getAttributes();
-        $error = 'Request attribute not found';
+	public function get(string $key, mixed $default = null): mixed
+	{
+		$params = $this->psrRequest->getAttributes();
+		$error = 'Request attribute not found';
 
-        return $this->returnOrFail($params, $key, $default, $error, func_num_args());
-    }
+		return $this->returnOrFail($params, $key, $default, $error, func_num_args());
+	}
 
-    public function uri(): PsrUri
-    {
-        return $this->psrRequest->getUri();
-    }
+	public function uri(): PsrUri
+	{
+		return $this->psrRequest->getUri();
+	}
 
-    public function origin(): string
-    {
-        $uri = $this->psrRequest->getUri();
-        $scheme = $uri->getScheme();
-        $origin = $scheme ? $scheme . ':' : '';
-        $authority = $uri->getAuthority();
-        $origin .= $authority ? '//' . $authority : '';
+	public function origin(): string
+	{
+		$uri = $this->psrRequest->getUri();
+		$scheme = $uri->getScheme();
+		$origin = $scheme ? $scheme . ':' : '';
+		$authority = $uri->getAuthority();
+		$origin .= $authority ? '//' . $authority : '';
 
-        return $origin;
-    }
+		return $origin;
+	}
 
-    public function target(): string
-    {
-        return $this->psrRequest->getRequestTarget();
-    }
+	public function target(): string
+	{
+		return $this->psrRequest->getRequestTarget();
+	}
 
-    public function method(): string
-    {
-        return strtoupper($this->psrRequest->getMethod());
-    }
+	public function method(): string
+	{
+		return strtoupper($this->psrRequest->getMethod());
+	}
 
-    public function isMethod(string $method): bool
-    {
-        return strtoupper($method) === $this->method();
-    }
+	public function isMethod(string $method): bool
+	{
+		return strtoupper($method) === $this->method();
+	}
 
-    public function body(): PsrStream
-    {
-        return $this->psrRequest->getBody();
-    }
+	public function body(): PsrStream
+	{
+		return $this->psrRequest->getBody();
+	}
 
-    public function json(
-        int $flags = JSON_OBJECT_AS_ARRAY,
-    ): mixed {
-        $body = (string)$this->psrRequest->getBody();
+	public function json(
+		int $flags = JSON_OBJECT_AS_ARRAY,
+	): mixed {
+		$body = (string) $this->psrRequest->getBody();
 
-        return json_decode(
-            $body,
-            true,
-            512, // PHP default value
-            $flags,
-        );
-    }
+		return json_decode(
+			$body,
+			true,
+			512, // PHP default value
+			$flags,
+		);
+	}
 
-    /**
-     * Returns always a list of uploaded files, even if there is
-     * only one file.
-     *
-     * Psalm does not support multi file uploads yet and complains
-     * about type issues. We need to suppres some of these errors.
-     *
-     * @no-named-arguments
-     *
-     * @psalm-param list<string>|string ...$keys
-     *
-     * @throws OutOfBoundsException RuntimeException
-     */
-    public function files(array|string ...$keys): array
-    {
-        $files = $this->psrRequest->getUploadedFiles();
-        $keys = $this->validateKeys($keys);
+	/**
+	 * Returns always a list of uploaded files, even if there is
+	 * only one file.
+	 *
+	 * Psalm does not support multi file uploads yet and complains
+	 * about type issues. We need to suppres some of these errors.
+	 *
+	 * @no-named-arguments
+	 *
+	 * @psalm-param list<string>|string ...$keys
+	 *
+	 * @throws OutOfBoundsException RuntimeException
+	 */
+	public function files(array|string ...$keys): array
+	{
+		$files = $this->psrRequest->getUploadedFiles();
+		$keys = $this->validateKeys($keys);
 
-        if (count($keys) === 0) {
-            return $files;
-        }
+		if (count($keys) === 0) {
+			return $files;
+		}
 
-        // Walk into the uploaded files structure
-        foreach ($keys as $key) {
-            if (is_array($files) && array_key_exists($key, $files)) {
-                /**
-                * @psalm-suppress MixedAssignment
-                *
-                * Psalm does not support recursive types like:
-                *     T = array<string, string|T>
-                */
-                $files = $files[$key];
-            } else {
-                throw new OutOfBoundsException('Invalid files key ' . $this->formatKeys($keys));
-            }
-        }
+		// Walk into the uploaded files structure
+		foreach ($keys as $key) {
+			if (is_array($files) && array_key_exists($key, $files)) {
+				/**
+				* @psalm-suppress MixedAssignment
+				*
+				* Psalm does not support recursive types like:
+				*     T = array<string, string|T>
+				*/
+				$files = $files[$key];
+			} else {
+				throw new OutOfBoundsException('Invalid files key ' . $this->formatKeys($keys));
+			}
+		}
 
-        // Check if it is a single file upload.
-        // A multifile upload would already produce an array
-        if ($files instanceof PsrUploadedFile) {
-            return [$files];
-        }
+		// Check if it is a single file upload.
+		// A multifile upload would already produce an array
+		if ($files instanceof PsrUploadedFile) {
+			return [$files];
+		}
 
-        assert(is_array($files));
+		assert(is_array($files));
 
-        return $files;
-    }
+		return $files;
+	}
 
-    /**
-     * Psalm does not support multi file uploads yet and complains
-     * about type issues. We need to suppres some of the errors.
-     *
-     * @no-named-arguments
-     *
-     * @psalm-param list<non-empty-string>|string ...$keys
-     *
-     * @throws OutOfBoundsException RuntimeException
-     */
-    public function file(array|string ...$keys): PsrUploadedFile
-    {
-        $keys = $this->validateKeys($keys);
+	/**
+	 * Psalm does not support multi file uploads yet and complains
+	 * about type issues. We need to suppres some of the errors.
+	 *
+	 * @no-named-arguments
+	 *
+	 * @psalm-param list<non-empty-string>|string ...$keys
+	 *
+	 * @throws OutOfBoundsException RuntimeException
+	 */
+	public function file(array|string ...$keys): PsrUploadedFile
+	{
+		$keys = $this->validateKeys($keys);
 
-        if (count($keys) === 0) {
-            throw new RuntimeException('No file key given');
-        }
+		if (count($keys) === 0) {
+			throw new RuntimeException('No file key given');
+		}
 
-        $files = $this->psrRequest->getUploadedFiles();
-        $i = 0;
+		$files = $this->psrRequest->getUploadedFiles();
+		$i = 0;
 
-        foreach ($keys as $key) {
-            if (isset($files[$key])) {
-                /** @var array|PsrUploadedFile */
-                $files = $files[$key];
-                $i++;
+		foreach ($keys as $key) {
+			if (isset($files[$key])) {
+				/** @var array|PsrUploadedFile */
+				$files = $files[$key];
+				$i++;
 
-                if ($files instanceof PsrUploadedFile) {
-                    if ($i < count($keys)) {
-                        throw new OutOfBoundsException(
-                            'Invalid file key (too deep) ' . $this->formatKeys($keys)
-                        );
-                    }
+				if ($files instanceof PsrUploadedFile) {
+					if ($i < count($keys)) {
+						throw new OutOfBoundsException(
+							'Invalid file key (too deep) ' . $this->formatKeys($keys),
+						);
+					}
 
-                    return $files;
-                }
-            } else {
-                throw new OutOfBoundsException('Invalid file key ' . $this->formatKeys($keys));
-            }
-        }
+					return $files;
+				}
+			} else {
+				throw new OutOfBoundsException('Invalid file key ' . $this->formatKeys($keys));
+			}
+		}
 
-        throw new RuntimeException('Multiple files available at key ' . $this->formatKeys($keys));
-    }
+		throw new RuntimeException('Multiple files available at key ' . $this->formatKeys($keys));
+	}
 
-    private function returnOrFail(
-        array|null $array,
-        string $key,
-        mixed $default,
-        string $error,
-        int $numArgs
-    ): mixed {
-        if ((is_null($array) || !array_key_exists($key, $array)) && $numArgs > 1) {
-            return $default;
-        }
+	private function returnOrFail(
+		array|null $array,
+		string $key,
+		mixed $default,
+		string $error,
+		int $numArgs,
+	): mixed {
+		if ((is_null($array) || !array_key_exists($key, $array)) && $numArgs > 1) {
+			return $default;
+		}
 
-        assert(!is_null($array));
+		assert(!is_null($array));
 
-        if (array_key_exists($key, $array)) {
-            return $array[$key];
-        }
+		if (array_key_exists($key, $array)) {
+			return $array[$key];
+		}
 
-        throw new OutOfBoundsException("{$error}: '{$key}'");
-    }
+		throw new OutOfBoundsException("{$error}: '{$key}'");
+	}
 
-    /** @psalm-param non-empty-list<string> $keys */
-    private function formatKeys(array $keys): string
-    {
-        return implode('', array_map(
-            fn ($key) => "['" . $key . "']",
-            $keys
-        ));
-    }
+	/** @psalm-param non-empty-list<string> $keys */
+	private function formatKeys(array $keys): string
+	{
+		return implode('', array_map(
+			fn($key) => "['" . $key . "']",
+			$keys,
+		));
+	}
 
-    /**
-     * @psalm-param list<list<string>|string> $keys
-     *
-     * @psalm-return list<string>
-     */
-    private function validateKeys(array $keys): array
-    {
-        if (isset($keys[0]) && is_array($keys[0])) {
-            if (count($keys) > 1) {
-                throw new RuntimeException('Either provide a single array or plain string arguments');
-            }
-            $keys = $keys[0];
-        }
+	/**
+	 * @psalm-param list<list<string>|string> $keys
+	 *
+	 * @psalm-return list<string>
+	 */
+	private function validateKeys(array $keys): array
+	{
+		if (isset($keys[0]) && is_array($keys[0])) {
+			if (count($keys) > 1) {
+				throw new RuntimeException('Either provide a single array or plain string arguments');
+			}
+			$keys = $keys[0];
+		}
 
-        /** @psalm-var list<string> */
-        return $keys;
-    }
+		/** @psalm-var list<string> */
+		return $keys;
+	}
 }

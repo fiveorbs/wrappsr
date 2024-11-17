@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace Conia\Http\Exception;
+namespace FiveOrbs\Http\Exception;
 
-class RuntimeException extends \RuntimeException
-{
-}
+class RuntimeException extends \RuntimeException {}
